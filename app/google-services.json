@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "556024595322",
+    "firebase_url": "https://clusterface-75742.firebaseio.com",
+    "project_id": "clusterface-75742",
+    "storage_bucket": "clusterface-75742.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:556024595322:android:967097f4e65d1c44",
+        "android_client_info": {
+          "package_name": "com.cluster.facelabs.clusterface"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "556024595322-nu6qt5bc253740bmgj1fu483hmfs89tt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-JwGBmQVwBQxr0gmIRHZWoTXO5yqlvvE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
