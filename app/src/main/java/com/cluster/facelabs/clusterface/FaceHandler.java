@@ -135,17 +135,13 @@ public class FaceHandler {
                 + "/Clusterface/Input";
 
         File inputDir = new File(inputDirPath);
-        boolean success = true;
-        if(!inputDir.exists())
-            success = inputDir.mkdirs();
-        if(!success){
-            Utils.showToast(mContext, "ERROR : could not create input folder!");
+        if(!inputDir.exists()) {
+            Utils.showToast(mContext, "ERROR : Input folder not found!");
             return;
         }
 
         File[] files = inputDir.listFiles();
         if(files == null){
-            Log.d("finding faces", "No files found!");
             Utils.showToast(mContext, "ERROR : No files found in the input folder!");
             return;
         }
