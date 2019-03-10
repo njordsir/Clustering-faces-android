@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Environment;
 import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -187,4 +190,24 @@ public class TfliteHandler
         }
     }
 
+    public void runTfliteInferenceOnAllCrops(){
+        String cropsDirPath = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops";
+        File cropsDir = new File(cropsDirPath);
+
+        File[] files = cropsDir.listFiles();
+        if(files == null){
+            Utils.showToast(mContext, "No crops found!");
+            return;
+        }
+
+        MainActivity.encodingProgressBar.setMax(files.length + 1);
+
+        for (int i = 0; i < files.length; i++){
+            Log.d("encoding", files[i].getName());
+            Bitmap bm = BitmapFactory.decodeFile(files[i].getAbsolutePath());
+            runTfliteInference(bm, files[i].getName());
+            MainActivity.encodingProgressBar.incrementProgressBy(1);
+        }
+    }
 }

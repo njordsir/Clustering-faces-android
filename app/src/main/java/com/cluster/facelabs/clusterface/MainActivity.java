@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static ProgressBar faceQueueProgressbar;
     public static ProgressBar faceProgressbar;
+    public static ProgressBar encodingProgressBar;
 
     TfliteHandler tfliteHandler = null;
     FaceHandler faceHandler = null;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
         faceQueueProgressbar = findViewById(R.id.face_queue_pbar);
         faceProgressbar = findViewById(R.id.face_pbar);
+        encodingProgressBar = findViewById(R.id.encoding_pbar);
     }
 
     private void requestPermissions(){
@@ -109,5 +111,11 @@ public class MainActivity extends AppCompatActivity {
         if(faceHandler == null)
             faceHandler = new FaceHandler(this);
         faceHandler.getCrops();
+    }
+
+    public void getEncodings(View view){
+        if(tfliteHandler == null)
+            tfliteHandler = new TfliteHandler(this, MainActivity.this);
+        tfliteHandler.runTfliteInferenceOnAllCrops();
     }
 }

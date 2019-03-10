@@ -40,6 +40,19 @@
             android:padding="5dp"
             android:progress="0"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Generating face encodings..."
+            android:textSize="18sp"/>
+        <ProgressBar
+            android:id="@+id/encoding_pbar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:padding="5dp"
+            android:progress="0"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -80,7 +93,8 @@
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="8dp"
             android:text="Encode"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:onClick="getEncodings"/>
 
         <Button
             android:id="@+id/cluster_button"
