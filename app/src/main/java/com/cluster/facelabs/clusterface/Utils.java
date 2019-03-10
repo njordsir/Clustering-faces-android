@@ -8,9 +8,12 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public class Utils
@@ -56,5 +59,17 @@ public class Utils
         }
 
         return savedImagePath;
+    }
+
+    public static void copyPhotoToInputFolder(Context context, Uri sourceUri){
+        String destPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                + "/Clusterface/Input/" + sourceUri.getLastPathSegment() + ".jpg";
+
+        try {
+            InputStream inputStream = context.getContentResolver().openInputStream(sourceUri);
+            FileUtils.copyInputStreamToFile(inputStream, new File(destPath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
