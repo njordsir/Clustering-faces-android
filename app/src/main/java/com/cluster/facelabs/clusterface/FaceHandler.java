@@ -3,9 +3,13 @@ package com.cluster.facelabs.clusterface;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.ml.vision.FirebaseVision;
@@ -14,6 +18,7 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -118,6 +123,47 @@ public class FaceHandler {
             }catch (IllegalArgumentException e){
                 Log.d("finding", "Illegal argument to crop!");
             }
+        }
+    }
+
+    /**find faces for all images in the input directory*/
+    public void getCrops(){
+        String inputDirPath = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES)
+                + "/Clusterface/Input";
+
+        File inputDir = new File(inputDirPath);
+        boolean success = true;
+        if(!inputDir.exists())
+            success = inputDir.mkdirs();
+        if(!success){
+            Utils.showToast(mContext, "ERROR : could not create input folder!");
+            return;
+        }
+
+        File[] files = inputDir.listFiles();
+        if(files == null){
+            Log.d("finding faces", "No files found!");
+            Utils.showToast(mContext, "ERROR : No files found in the input folder!");
+            return;
+        }
+
+        for (int i = 0; i < files.length; i++){
+            final String fileName = files[i].getName();
+            Log.d("finding faces", fileName);
+
+            /**runFaceRecognition(Uri.fromFile(files[i]), null);
+             * this gives error and loads images with the wrong orientation etc
+             * cropping seems to always fix this
+             * using glide to load bitmap from file with center cropping*/
+
+            Glide.with(mContext).asBitmap().load(files[i])
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                            runFaceRecognition(null, resource, fileName);}});
+
+            Log.d("finding faces", "Done!");
         }
     }
 
