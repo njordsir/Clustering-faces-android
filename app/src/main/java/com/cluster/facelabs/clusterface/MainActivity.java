@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static ProgressBar faceQueueProgressbar;
     public static ProgressBar faceProgressbar;
+    public static ProgressBar encodingQueueProgressBar;
     public static ProgressBar encodingProgressBar;
 
     TfliteHandler tfliteHandler = null;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         faceQueueProgressbar = findViewById(R.id.face_queue_pbar);
         faceProgressbar = findViewById(R.id.face_pbar);
+        encodingQueueProgressBar = findViewById(R.id.encoding_queue_pbar);
         encodingProgressBar = findViewById(R.id.encoding_pbar);
     }
 

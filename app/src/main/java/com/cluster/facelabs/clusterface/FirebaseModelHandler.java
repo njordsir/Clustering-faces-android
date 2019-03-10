@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -89,7 +90,7 @@ public class FirebaseModelHandler {
             e.printStackTrace();
         }
 
-        mFaceEncodingOutput = new float[1][DIM_ENCODING];
+        mFaceEncodingOutput = new float[DIM_BATCH][DIM_ENCODING];
     }
 
     private void findMeanAndStd(){
@@ -121,8 +122,6 @@ public class FirebaseModelHandler {
         var /= size;
         std = (float)Math.sqrt(var);
         std = Math.max(std, 1.f/((float)Math.sqrt(size)));
-
-        Log.d("encoding", "Mean : " + String.valueOf(mean) + " Std : " + String.valueOf(std));
     }
 
     private synchronized ByteBuffer convertBitmapToByteBuffer(Bitmap bitmap) {
@@ -172,6 +171,8 @@ public class FirebaseModelHandler {
     }
 
     private void runFBModelInference(Bitmap bmap, String fileName) {
+        final String fname = fileName;
+
         if(bmap == null){
             Utils.showToast(mContext, "ERROR : Trying to run inference on null bitmap!");
             return;
@@ -218,6 +219,24 @@ public class FirebaseModelHandler {
         }
     }
 
+    private class AsyncInferenceHandler extends AsyncTask<File, Integer, Void>{
+
+        @Override
+        protected Void doInBackground(File... files) {
+            for (int i = 0; i < files.length; i++){
+                Bitmap bm = BitmapFactory.decodeFile(files[i].getAbsolutePath());
+                runFBModelInference(bm, files[i].getName());
+                publishProgress(i+1);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            MainActivity.encodingQueueProgressBar.setProgress(values[0]);
+        }
+    }
+
     public void runFBModelInferenceOnAllCrops(){
         String cropsDirPath = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops";
@@ -229,14 +248,12 @@ public class FirebaseModelHandler {
             return;
         }
 
+        MainActivity.encodingQueueProgressBar.setMax(files.length);
+        MainActivity.encodingQueueProgressBar.setProgress(0);
         MainActivity.encodingProgressBar.setMax(files.length);
         MainActivity.encodingProgressBar.setProgress(0);
 
-        for (int i = 0; i < files.length; i++){
-            Log.d("encoding", files[i].getName());
-            Bitmap bm = BitmapFactory.decodeFile(files[i].getAbsolutePath());
-            runFBModelInference(bm, files[i].getName());
-        }
+        new AsyncInferenceHandler().execute(files);
     }
 
 }
