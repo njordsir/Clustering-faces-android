@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     TfliteHandler tfliteHandler = null;
     FaceHandler faceHandler = null;
+    FirebaseModelHandler fbModelHandler = null;
 
     private static final int RC_STORAGE_PERMISSION = 0;
     private static final int RC_PHOTO_PICKER = 1;
@@ -117,5 +118,11 @@ public class MainActivity extends AppCompatActivity {
         if(tfliteHandler == null)
             tfliteHandler = new TfliteHandler(this, MainActivity.this);
         tfliteHandler.runTfliteInferenceOnAllCrops();
+    }
+
+    public void getFBEncodings(View view){
+        if(fbModelHandler == null)
+            fbModelHandler = new FirebaseModelHandler(this);
+        fbModelHandler.runFBModelInferenceOnAllCrops();
     }
 }

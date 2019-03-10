@@ -1,36 +1,44 @@
 package com.cluster.facelabs.clusterface;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
-import org.tensorflow.lite.Interpreter;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.ml.common.FirebaseMLException;
+import com.google.firebase.ml.custom.FirebaseModelDataType;
+import com.google.firebase.ml.custom.FirebaseModelInputOutputOptions;
+import com.google.firebase.ml.custom.FirebaseModelInputs;
+import com.google.firebase.ml.custom.FirebaseModelInterpreter;
+import com.google.firebase.ml.custom.FirebaseModelManager;
+import com.google.firebase.ml.custom.FirebaseModelOptions;
+import com.google.firebase.ml.custom.FirebaseModelOutputs;
+import com.google.firebase.ml.custom.model.FirebaseLocalModelSource;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 
-public class TfliteHandler
-{
+public class FirebaseModelHandler {
+
     private Context mContext;
+    private FirebaseModelInterpreter mInterpreter;
+    private FirebaseModelInputOutputOptions mInputOutputOptions;
 
-    private Interpreter mTfliteIntepreter;
     /**file name of the tflite model*/
     private final String LOCAL_MODEL_ASSET = "sandberg.tflite";
+
     /**is the tflite model quantized?
      * will change the size of bytebuffer in the method "convertBitmapToByteBuffer"*/
     private final boolean IS_QUANT_MODEL = false;
 
     /**image dimensions*/
+    private final int DIM_BATCH = 1;
     private final int DIM_X = 160;
     private final int DIM_Y = 160;
     private final int DIM_Z = 3;
@@ -46,39 +54,42 @@ public class TfliteHandler
     /**placeholder for the output encoding of the model*/
     private float [][] mFaceEncodingOutput = null;
 
-    /**write all the crop names and crop encodings
-     * to a text file for decoding*/
-    String encodingsAsString = "";
-    String fileNamesAsString = "";
-
-    /**constructor*/
-    public TfliteHandler(Context context, Activity activity){
+    public FirebaseModelHandler(Context context){
         mContext = context;
-        initTfliteModel(activity);
+        initFBModel();
     }
 
-    /** Memory-map the model file in Assets. */
-    private MappedByteBuffer loadModelFile(Activity activity) throws IOException {
-        AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(LOCAL_MODEL_ASSET);
-        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-        FileChannel fileChannel = inputStream.getChannel();
-        long startOffset = fileDescriptor.getStartOffset();
-        long declaredLength = fileDescriptor.getDeclaredLength();
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
-    }
+    private void initFBModel(){
+        int[] inputDims = {DIM_BATCH, DIM_X, DIM_Y, DIM_Z};
+        int[] outputDims = {DIM_BATCH, DIM_ENCODING};
 
-    /**load the model into memory*/
-    private void initTfliteModel(Activity activity){
         try {
-            mTfliteIntepreter = new Interpreter(loadModelFile(activity));
-        } catch (IOException e) {
-            e.printStackTrace();
-            Utils.showToast(mContext, "Unable to load model!");
-            return;
-        }
-        mFaceEncodingOutput = new float[1][DIM_ENCODING];
+            mInputOutputOptions = new FirebaseModelInputOutputOptions.Builder()
+                                    .setInputFormat(0,
+                                            FirebaseModelDataType.FLOAT32, inputDims)
+                                    .setOutputFormat(0,
+                                            FirebaseModelDataType.FLOAT32, outputDims)
+                                    .build();
 
-        Utils.showToast(mContext, "Loaded model!");
+            FirebaseLocalModelSource localSource =
+                    new FirebaseLocalModelSource.Builder("asset")
+                            .setAssetFilePath(LOCAL_MODEL_ASSET).build();
+
+            FirebaseModelManager manager = FirebaseModelManager.getInstance();
+            manager.registerLocalModelSource(localSource);
+
+            FirebaseModelOptions modelOptions =
+                    new FirebaseModelOptions.Builder()
+                            .setLocalModelName("asset")
+                            .build();
+
+            mInterpreter = FirebaseModelInterpreter.getInstance(modelOptions);
+
+        } catch (FirebaseMLException e) {
+            e.printStackTrace();
+        }
+
+        mFaceEncodingOutput = new float[1][DIM_ENCODING];
     }
 
     private void findMeanAndStd(){
@@ -114,7 +125,6 @@ public class TfliteHandler
         Log.d("encoding", "Mean : " + String.valueOf(mean) + " Std : " + String.valueOf(std));
     }
 
-    /**the tflite model accepts image as ByteBuffer*/
     private synchronized ByteBuffer convertBitmapToByteBuffer(Bitmap bitmap) {
         /**initialize buffer for image data*/
         ByteBuffer imgData =
@@ -161,13 +171,14 @@ public class TfliteHandler
         return imgData;
     }
 
-    private void runTfliteInference(Bitmap bmap, String fileName){
+    private void runFBModelInference(Bitmap bmap, String fileName) {
         if(bmap == null){
-            Log.d("encoding", "ERROR : Trying to run inference on null bitmap!");
+            Utils.showToast(mContext, "ERROR : Trying to run inference on null bitmap!");
+            return;
         }
 
-        if(mTfliteIntepreter == null) {
-            Utils.showToast(mContext,"ERROR : Intepreter not initialized!");
+        if (mInterpreter == null) {
+            Utils.showToast(mContext,"ERROR : Firebase Interpreter not initialized!");
             return;
         }
 
@@ -180,17 +191,34 @@ public class TfliteHandler
             return;
         }
 
-        /**if all is as expected, run the inference*/
         try {
-            mTfliteIntepreter.run(imgData, mFaceEncodingOutput);
-        }catch (Exception e){
+            FirebaseModelInputs inputs = new FirebaseModelInputs.Builder().
+                                                add(imgData).build();
+
+            mInterpreter.run(inputs, mInputOutputOptions)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            e.printStackTrace();
+                            Utils.showToast(mContext, "Model inference failed!");
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<FirebaseModelOutputs>() {
+                        @Override
+                        public void onSuccess(FirebaseModelOutputs firebaseModelOutputs) {
+                            mFaceEncodingOutput = firebaseModelOutputs.getOutput(0);
+                            Log.d("FB encoding", "Encoding successful " + String.valueOf(mFaceEncodingOutput[0][0]));
+                            MainActivity.encodingProgressBar.incrementProgressBy(1);
+                        }
+                    });
+
+        } catch (FirebaseMLException e) {
             e.printStackTrace();
-            Utils.showToast(mContext,"ERROR : Could not run inference!");
-            return;
+            Utils.showToast(mContext, "Model inference exception!");
         }
     }
 
-    public void runTfliteInferenceOnAllCrops(){
+    public void runFBModelInferenceOnAllCrops(){
         String cropsDirPath = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops";
         File cropsDir = new File(cropsDirPath);
@@ -201,13 +229,14 @@ public class TfliteHandler
             return;
         }
 
-        MainActivity.encodingProgressBar.setMax(files.length + 1);
+        MainActivity.encodingProgressBar.setMax(files.length);
+        MainActivity.encodingProgressBar.setProgress(0);
 
         for (int i = 0; i < files.length; i++){
             Log.d("encoding", files[i].getName());
             Bitmap bm = BitmapFactory.decodeFile(files[i].getAbsolutePath());
-            runTfliteInference(bm, files[i].getName());
-            MainActivity.encodingProgressBar.incrementProgressBy(1);
+            runFBModelInference(bm, files[i].getName());
         }
     }
+
 }
