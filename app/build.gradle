@@ -15,6 +15,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    //added to avoid error : "More than one file was found with OS independent path 'META-INF/proguard/androidx-annotations.pro'"
+    packagingOptions {
+        exclude 'META-INF/proguard/androidx-annotations.pro'
+    }
     //Do not compress tflite models
     aaptOptions {
         noCompress "tflite"
@@ -26,6 +30,8 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.google.firebase:firebase-core:16.0.6'
+    //firebase vision
+    implementation 'com.google.firebase:firebase-ml-vision:18.0.2'
     //tflite
     implementation 'org.tensorflow:tensorflow-lite:1.12.0'
 }
