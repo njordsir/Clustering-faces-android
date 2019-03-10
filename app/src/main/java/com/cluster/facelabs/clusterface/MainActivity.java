@@ -11,12 +11,17 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    TfliteHandler tfliteHandler;
+    public static ProgressBar faceQueueProgressbar;
+    public static ProgressBar faceProgressbar;
+
+    TfliteHandler tfliteHandler = null;
+    FaceHandler faceHandler = null;
 
     private static final int RC_STORAGE_PERMISSION = 0;
     private static final int RC_PHOTO_PICKER = 1;
@@ -26,9 +31,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tfliteHandler = new TfliteHandler(this, MainActivity.this);
-
         requestPermissions();
+
+        faceQueueProgressbar = findViewById(R.id.face_queue_pbar);
+        faceProgressbar = findViewById(R.id.face_pbar);
     }
 
     private void requestPermissions(){
@@ -97,5 +103,11 @@ public class MainActivity extends AppCompatActivity {
                 Utils.showToast(this, "Unable to pick image from gallery!");
             }
         }
+    }
+
+    public void getFaces(View view){
+        if(faceHandler == null)
+            faceHandler = new FaceHandler(this);
+        faceHandler.getCrops();
     }
 }

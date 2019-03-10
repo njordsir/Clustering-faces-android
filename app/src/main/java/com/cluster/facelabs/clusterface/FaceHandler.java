@@ -124,6 +124,8 @@ public class FaceHandler {
                 Log.d("finding", "Illegal argument to crop!");
             }
         }
+
+        MainActivity.faceProgressbar.incrementProgressBy(1);
     }
 
     /**find faces for all images in the input directory*/
@@ -148,6 +150,11 @@ public class FaceHandler {
             return;
         }
 
+        MainActivity.faceQueueProgressbar.setMax(files.length);
+        MainActivity.faceQueueProgressbar.setProgress(0);
+        MainActivity.faceProgressbar.setMax(files.length);
+        MainActivity.faceProgressbar.setProgress(0);
+
         for (int i = 0; i < files.length; i++){
             final String fileName = files[i].getName();
             Log.d("finding faces", fileName);
@@ -163,6 +170,7 @@ public class FaceHandler {
                         public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
                             runFaceRecognition(null, resource, fileName);}});
 
+            MainActivity.faceQueueProgressbar.incrementProgressBy(1);
             Log.d("finding faces", "Done!");
         }
     }

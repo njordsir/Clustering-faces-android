@@ -12,7 +12,33 @@
         android:layout_weight="0.9"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Queueing face finders..."
+            android:textSize="18sp"/>
+        <ProgressBar
+            android:id="@+id/face_queue_pbar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:padding="5dp"
+            android:progress="0"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Extracting face crops..."
+            android:textSize="18sp"/>
+        <ProgressBar
+            android:id="@+id/face_pbar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:padding="5dp"
+            android:progress="0"/>
 
     </LinearLayout>
 
@@ -43,7 +69,8 @@
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="8dp"
             android:text="Faces"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:onClick="getFaces"/>
 
         <Button
             android:id="@+id/get_encodings_button"
