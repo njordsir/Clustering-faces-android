@@ -66,6 +66,41 @@
             android:padding="5dp"
             android:progress="0"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enter eps"
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/dbscan_eps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="7.8"
+            android:inputType="numberDecimal"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enter min pts"
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/dbscan_min_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="30"
+            android:inputType="number"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:textSize="18sp"
+            android:text="Debug : "/>
+        <TextView
+            android:id="@+id/cluster_output_text"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:textSize="18sp"
+            android:text="Cluster result : "/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -117,7 +152,8 @@
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="8dp"
             android:text="Cluster"
-            android:textSize="13sp"/>
+            android:textSize="13sp"
+            android:onClick="getClusters"/>
 
         <Button
             android:id="@+id/save_results_button"

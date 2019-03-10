@@ -40,6 +40,8 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
     //fileutils
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    //dbscan
+    implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.5'
 }
 
 apply plugin: 'com.google.gms.google-services'

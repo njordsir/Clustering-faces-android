@@ -21,9 +21,12 @@ import com.google.firebase.ml.custom.FirebaseModelOptions;
 import com.google.firebase.ml.custom.FirebaseModelOutputs;
 import com.google.firebase.ml.custom.model.FirebaseLocalModelSource;
 
+import org.apache.commons.math3.ml.clustering.DoublePoint;
+
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.HashMap;
 
 public class FirebaseModelHandler {
 
@@ -44,7 +47,7 @@ public class FirebaseModelHandler {
     private final int DIM_Y = 160;
     private final int DIM_Z = 3;
     /**encoding dimension*/
-    private static final int DIM_ENCODING = 128;
+    public static final int DIM_ENCODING = 128;
 
     /**pre-whiten the images before passing through the network*/
     private final boolean mPreWhiten = true;
@@ -54,6 +57,22 @@ public class FirebaseModelHandler {
     private final int[] mIntValues = new int[DIM_X * DIM_Y];
     /**placeholder for the output encoding of the model*/
     private float [][] mFaceEncodingOutput = null;
+
+    public class Encoding{
+        float[] enc;
+        DoublePoint dbPoint;
+
+        Encoding(float[] values){
+            enc = new float[DIM_ENCODING];
+            System.arraycopy(values, 0, enc, 0, DIM_ENCODING);
+
+            double[] p = new double[DIM_ENCODING];
+            for(int i = 0; i < DIM_ENCODING; i++)
+                p[i] = enc[i];
+            dbPoint = new DoublePoint(p);
+        }
+    }
+    public HashMap<String, Encoding> mEncodings;
 
     public FirebaseModelHandler(Context context){
         mContext = context;
@@ -85,6 +104,7 @@ public class FirebaseModelHandler {
                             .build();
 
             mInterpreter = FirebaseModelInterpreter.getInstance(modelOptions);
+            mEncodings = new HashMap<>();
 
         } catch (FirebaseMLException e) {
             e.printStackTrace();
@@ -209,6 +229,7 @@ public class FirebaseModelHandler {
                         public void onSuccess(FirebaseModelOutputs firebaseModelOutputs) {
                             mFaceEncodingOutput = firebaseModelOutputs.getOutput(0);
                             Log.d("FB encoding", "Encoding successful " + String.valueOf(mFaceEncodingOutput[0][0]));
+                            mEncodings.put(fname, new Encoding(mFaceEncodingOutput[0]));
                             MainActivity.encodingProgressBar.incrementProgressBy(1);
                         }
                     });

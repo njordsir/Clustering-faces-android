@@ -11,7 +11,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -22,9 +24,15 @@ public class MainActivity extends AppCompatActivity {
     public static ProgressBar encodingQueueProgressBar;
     public static ProgressBar encodingProgressBar;
 
+    public static EditText dBScanEpsText;
+    public static EditText dBScanMinPtsText;
+
+    public static TextView clusterResultsText;
+
     TfliteHandler tfliteHandler = null;
     FaceHandler faceHandler = null;
     FirebaseModelHandler fbModelHandler = null;
+    ClusteringHandler clusteringHandler = null;
 
     private static final int RC_STORAGE_PERMISSION = 0;
     private static final int RC_PHOTO_PICKER = 1;
@@ -40,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
         faceProgressbar = findViewById(R.id.face_pbar);
         encodingQueueProgressBar = findViewById(R.id.encoding_queue_pbar);
         encodingProgressBar = findViewById(R.id.encoding_pbar);
+
+        dBScanEpsText = findViewById(R.id.dbscan_eps);
+        dBScanMinPtsText = findViewById(R.id.dbscan_min_count);
+
+        clusterResultsText = findViewById(R.id.cluster_output_text);
     }
 
     private void requestPermissions(){
@@ -126,5 +139,12 @@ public class MainActivity extends AppCompatActivity {
         if(fbModelHandler == null)
             fbModelHandler = new FirebaseModelHandler(this);
         fbModelHandler.runFBModelInferenceOnAllCrops();
+    }
+
+    public void getClusters(View view){
+        if(clusteringHandler == null)
+            clusteringHandler = new ClusteringHandler();
+        if(fbModelHandler != null)
+            clusteringHandler.DBScanClustering(fbModelHandler);
     }
 }
