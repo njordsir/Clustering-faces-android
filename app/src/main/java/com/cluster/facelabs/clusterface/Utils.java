@@ -15,6 +15,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.Map;
 
 public class Utils
 {
@@ -72,4 +74,57 @@ public class Utils
             e.printStackTrace();
         }
     }
+
+    public static void createResultsFolder(ClusteringHandler clHandler,
+                                    FirebaseModelHandler fbHandler){
+        String resultsDirPath = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES) + "/Clusterface/Results";
+        File resultsDir = new File(resultsDirPath);
+
+        /**create results folder*/
+        boolean success = true;
+        if (!resultsDir.exists()) success = resultsDir.mkdirs();
+        if(!success){Log.d("save_debug", "Could not create results folder!");return;}
+
+        /**create folders for the clusters*/
+        for(int i = -1; i < clHandler.mDBClusters.size(); i++){
+            String clusterDirPath = resultsDirPath + "/" + i;
+            File clusterDir = new File(clusterDirPath);
+            success = true;
+            if (!clusterDir.exists()) success = clusterDir.mkdirs();
+            if(!success){Log.d("save_debug", "Could not create clusters folder!");return;}
+        }
+
+        /**get the crops directory path
+         * images will be loaded from here and saved to the results folder*/
+        String cropsDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops";
+
+        Iterator it = fbHandler.mEncodings.entrySet().iterator();
+        MainActivity.saveResultsProgressBar.setMax(fbHandler.mEncodings.size());
+        MainActivity.saveResultsProgressBar.setProgress(0);
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            String fileName = pair.getKey().toString();
+            FirebaseModelHandler.Encoding encoding =
+                    (FirebaseModelHandler.Encoding) pair.getValue();
+
+            /**get the cluster id for this encoding*/
+            int clusterIdx = clHandler.getDBScanClusterIdx(encoding);
+
+            String sourcePath = cropsDirPath + "/" + fileName;
+            String destPath = resultsDirPath + "/" + clusterIdx + "/" +  fileName;
+
+            File source = new File(sourcePath);
+            File dest = new File(destPath);
+            try {
+                FileUtils.copyFile(source, dest);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d("save_debug", "Unable to copy image to results folder!");
+            }
+            MainActivity.saveResultsProgressBar.incrementProgressBy(1);
+        }
+    }
+
+    //TODO : use asynctask for saving files
 }

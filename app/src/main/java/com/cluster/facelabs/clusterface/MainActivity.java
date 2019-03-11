@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     public static ProgressBar faceProgressbar;
     public static ProgressBar encodingQueueProgressBar;
     public static ProgressBar encodingProgressBar;
+    public static ProgressBar saveResultsProgressBar;
 
     public static EditText dBScanEpsText;
     public static EditText dBScanMinPtsText;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         faceProgressbar = findViewById(R.id.face_pbar);
         encodingQueueProgressBar = findViewById(R.id.encoding_queue_pbar);
         encodingProgressBar = findViewById(R.id.encoding_pbar);
+        saveResultsProgressBar = findViewById(R.id.save_results_pbar);
 
         dBScanEpsText = findViewById(R.id.dbscan_eps);
         dBScanMinPtsText = findViewById(R.id.dbscan_min_count);
@@ -146,5 +148,9 @@ public class MainActivity extends AppCompatActivity {
             clusteringHandler = new ClusteringHandler();
         if(fbModelHandler != null)
             clusteringHandler.DBScanClustering(fbModelHandler);
+    }
+
+    public void getResults(View view){
+        Utils.createResultsFolder(clusteringHandler, fbModelHandler);
     }
 }

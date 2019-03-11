@@ -14,7 +14,7 @@ import org.apache.commons.math3.ml.clustering.DoublePoint;
 
 public class ClusteringHandler {
 
-    List<Cluster<DoublePoint>> mDBClusters;
+    public List<Cluster<DoublePoint>> mDBClusters;
     private String mClusterOutputString;
     private float mDBScanEps = 7;
     private int mDBScanMinPts = 30;
@@ -52,5 +52,13 @@ public class ClusteringHandler {
 
         MainActivity.clusterResultsText.setText(mClusterOutputString);
         Log.d("cluster_debug", mClusterOutputString);
+    }
+
+    /**get the cluster that the encoding belongs to*/
+    int getDBScanClusterIdx(Encoding encoding){
+        for(int i = 0; i < mDBClusters.size(); i++)
+            if(mDBClusters.get(i).getPoints().contains(encoding.dbPoint))
+                return i;
+        return -1;
     }
 }

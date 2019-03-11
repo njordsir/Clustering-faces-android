@@ -69,6 +69,19 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Saving results..."
+            android:textSize="18sp"/>
+        <ProgressBar
+            android:id="@+id/save_results_pbar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:padding="5dp"
+            android:progress="0"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="Enter eps"
             android:textSize="18sp"/>
         <EditText
@@ -163,7 +176,8 @@
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="8dp"
             android:text="Result"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:onClick="getResults"/>
 
     </LinearLayout>
 
