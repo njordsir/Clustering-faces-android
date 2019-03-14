@@ -21,7 +21,7 @@ import com.google.firebase.ml.custom.FirebaseModelOptions;
 import com.google.firebase.ml.custom.FirebaseModelOutputs;
 import com.google.firebase.ml.custom.model.FirebaseLocalModelSource;
 
-import org.apache.commons.math3.ml.clustering.DoublePoint;
+import com.cluster.facelabs.clusterface.InferenceHelper.Encoding;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -43,11 +43,11 @@ public class FirebaseModelHandler {
 
     /**image dimensions*/
     private final int DIM_BATCH = 1;
-    private final int DIM_X = 160;
-    private final int DIM_Y = 160;
-    private final int DIM_Z = 3;
+    private final int DIM_X = InferenceHelper.DIM_X;
+    private final int DIM_Y = InferenceHelper.DIM_Y;
+    private final int DIM_Z = InferenceHelper.DIM_Z;
     /**encoding dimension*/
-    public static final int DIM_ENCODING = 128;
+    private final int DIM_ENCODING = InferenceHelper.DIM_ENCODING;
 
     /**pre-whiten the images before passing through the network*/
     private final boolean mPreWhiten = true;
@@ -58,20 +58,6 @@ public class FirebaseModelHandler {
     /**placeholder for the output encoding of the model*/
     private float [][] mFaceEncodingOutput = null;
 
-    public class Encoding{
-        float[] enc;
-        DoublePoint dbPoint;
-
-        Encoding(float[] values){
-            enc = new float[DIM_ENCODING];
-            System.arraycopy(values, 0, enc, 0, DIM_ENCODING);
-
-            double[] p = new double[DIM_ENCODING];
-            for(int i = 0; i < DIM_ENCODING; i++)
-                p[i] = enc[i];
-            dbPoint = new DoublePoint(p);
-        }
-    }
     public HashMap<String, Encoding> mEncodings;
 
     public FirebaseModelHandler(Context context){

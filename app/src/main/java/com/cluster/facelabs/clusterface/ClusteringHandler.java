@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import com.cluster.facelabs.clusterface.FirebaseModelHandler.Encoding;
+import com.cluster.facelabs.clusterface.InferenceHelper.Encoding;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
+
+import static com.cluster.facelabs.clusterface.InferenceHelper.DIM_ENCODING;
 
 public class ClusteringHandler {
 
@@ -26,7 +28,14 @@ public class ClusteringHandler {
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry)it.next();
             Encoding encoding = (Encoding) pair.getValue();
-            dEncodings.add(encoding.dbPoint);
+
+            /**convert encodings to DoublePoint*/
+            DoublePoint dbPoint;
+            double[] p = new double[DIM_ENCODING];
+            for(int i = 0; i < DIM_ENCODING; i++)
+                p[i] = encoding.enc[i];
+            dbPoint = new DoublePoint(p);
+            dEncodings.add(dbPoint);
         }
 
         /**get clusters*/
@@ -56,9 +65,19 @@ public class ClusteringHandler {
 
     /**get the cluster that the encoding belongs to*/
     int getDBScanClusterIdx(Encoding encoding){
-        for(int i = 0; i < mDBClusters.size(); i++)
-            if(mDBClusters.get(i).getPoints().contains(encoding.dbPoint))
-                return i;
+
+        DoublePoint dbpointEncoding;
+        double[] p = new double[DIM_ENCODING];
+        for(int i = 0; i < DIM_ENCODING; i++)
+            p[i] = encoding.enc[i];
+        dbpointEncoding = new DoublePoint(p);
+
+        for(int i = 0; i < mDBClusters.size(); i++) {
+            List<DoublePoint> clusterPoints = mDBClusters.get(i).getPoints();
+            for(int j = 0; j < clusterPoints.size(); j++)
+                if(dbpointEncoding.equals(clusterPoints.get(j)))
+                    return i;
+        }
         return -1;
     }
 }

@@ -18,6 +18,8 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.cluster.facelabs.clusterface.InferenceHelper.Encoding;
+
 public class Utils
 {
     public static void showToast(Context context,  String message) {
@@ -105,8 +107,8 @@ public class Utils
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
             String fileName = pair.getKey().toString();
-            FirebaseModelHandler.Encoding encoding =
-                    (FirebaseModelHandler.Encoding) pair.getValue();
+            Encoding encoding =
+                    (Encoding) pair.getValue();
 
             /**get the cluster id for this encoding*/
             int clusterIdx = clHandler.getDBScanClusterIdx(encoding);
