@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -78,18 +79,34 @@ public class Utils
     }
 
     public static void createResultsFolder(ClusteringHandler clHandler,
-                                    FirebaseModelHandler fbHandler){
+                                           HashMap<String, Encoding> Encodings){
         String resultsDirPath = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES) + "/Clusterface/Results";
         File resultsDir = new File(resultsDirPath);
 
         /**create results folder*/
-        boolean success = true;
-        if (!resultsDir.exists()) success = resultsDir.mkdirs();
+        if(resultsDir.exists()) try {
+            FileUtils.deleteDirectory(resultsDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("save_debug", "Could not delete existing results folder!");
+            return;
+        }
+
+        boolean success = resultsDir.mkdirs();
         if(!success){Log.d("save_debug", "Could not create results folder!");return;}
 
         /**create folders for the clusters*/
-        for(int i = -1; i < clHandler.mDBClusters.size(); i++){
+        int num_clusters;
+        if(MainActivity.clusterMethod == "DBScan")
+            num_clusters = clHandler.mDBClusters.size();
+        else if(MainActivity.clusterMethod == "KMeans")
+            num_clusters = clHandler.bestKMeans.size();
+        else
+            return;
+
+        /**create folders for the clusters*/
+        for(int i = -1; i < num_clusters; i++){
             String clusterDirPath = resultsDirPath + "/" + i;
             File clusterDir = new File(clusterDirPath);
             success = true;
@@ -101,8 +118,8 @@ public class Utils
          * images will be loaded from here and saved to the results folder*/
         String cropsDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops";
 
-        Iterator it = fbHandler.mEncodings.entrySet().iterator();
-        MainActivity.saveResultsProgressBar.setMax(fbHandler.mEncodings.size());
+        Iterator it = Encodings.entrySet().iterator();
+        MainActivity.saveResultsProgressBar.setMax(Encodings.size());
         MainActivity.saveResultsProgressBar.setProgress(0);
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
@@ -111,7 +128,13 @@ public class Utils
                     (Encoding) pair.getValue();
 
             /**get the cluster id for this encoding*/
-            int clusterIdx = clHandler.getDBScanClusterIdx(encoding);
+            int clusterIdx;
+            if(MainActivity.clusterMethod == MainActivity.dbscan)
+                clusterIdx = clHandler.getDBScanClusterIdx(encoding);
+            else if(MainActivity.clusterMethod == MainActivity.kmeans)
+                clusterIdx = clHandler.getKMeansClusterIdx(encoding);
+            else
+                return;
 
             String sourcePath = cropsDirPath + "/" + fileName;
             String destPath = resultsDirPath + "/" + clusterIdx + "/" +  fileName;

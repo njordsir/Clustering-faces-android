@@ -18,9 +18,73 @@ import static com.cluster.facelabs.clusterface.InferenceHelper.DIM_ENCODING;
 public class ClusteringHandler {
 
     public List<Cluster<DoublePoint>> mDBClusters;
-    private String mClusterOutputString;
     private float mDBScanEps = 7;
     private int mDBScanMinPts = 30;
+
+    List<KMeans.Mean> bestKMeans;
+
+    /**no. of iterations to run the kmeans clustering for*/
+    private static final int mClusterIter = 50;
+
+    public void KMeansClustering(HashMap<String, Encoding> Encodings){
+        /**get all the encodings from the dictionary**/
+        int DIM_ENCODING = InferenceHelper.DIM_ENCODING;
+        float[][] encodings = new float[Encodings.size()][DIM_ENCODING];
+        Iterator it = Encodings.entrySet().iterator();
+        int e = 0;
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            Encoding encoding = (Encoding) pair.getValue();
+            System.arraycopy(encoding.enc, 0, encodings[e++], 0, DIM_ENCODING);
+        }
+
+        KMeans kmeans = new KMeans();
+
+        /**get the number of desired cluster from user input*/
+        int k = Integer.parseInt(MainActivity.kmeansKText.getText().toString());
+
+        /**perform the clustering multiple times and choose the one with max score*/
+        double bestScore = 0;
+        bestKMeans = null;
+
+        for(int km = 0; km < mClusterIter; km ++) {
+            List<KMeans.Mean> means = kmeans.predict(k, encodings);
+            double score = KMeans.score(means);
+            if (score > bestScore) {
+                bestKMeans = means;
+                bestScore = score;
+            }
+        }
+
+        showKMeansOutput(Encodings);
+    }
+
+    public void showKMeansOutput(HashMap<String, Encoding> Encodings){
+        /**print the cluster for each crop*/
+        int[] clusterSizes = new int[bestKMeans.size()]; //+1?
+
+        Iterator it = Encodings.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            String fileName = pair.getKey().toString();
+            Encoding encoding = (Encoding) pair.getValue();
+            KMeans.Mean nearestMean = KMeans.nearestMean(encoding.enc, bestKMeans);
+            int clusterIdx = bestKMeans.indexOf(nearestMean);
+            clusterSizes[clusterIdx] += 1;
+            Log.d("cluster", fileName + " : " + clusterIdx);
+        }
+
+        String clusterOutputString = "Cluster counts : ";
+        for(int i = 0; i < bestKMeans.size(); i++)
+            clusterOutputString += (clusterSizes[i] + " ");
+        MainActivity.clusterResultsText.setText(clusterOutputString);
+        Log.d("cluster_debug", clusterOutputString);
+    }
+
+    int getKMeansClusterIdx(Encoding encoding){
+        KMeans.Mean nearestMean = KMeans.nearestMean(encoding.enc, bestKMeans);
+        return bestKMeans.indexOf(nearestMean);
+    }
 
     public void DBScanClustering(HashMap<String, Encoding> Encodings){
         /**get all encodings as double point vectors*/
@@ -48,20 +112,24 @@ public class ClusteringHandler {
         mDBClusters = dbscan.cluster(dEncodings);
         Log.d("cluster_debug", String.valueOf(mDBClusters.size()));
 
+        showDBScanOutput(Encodings.size());
+    }
+
+    void showDBScanOutput(int numPoints){
         /**inspect cluster distribution*/
         int clusteredPhotos = 0;
-        mClusterOutputString = "";
+        String clusterOutputString = "";
         for(int i = 0; i < mDBClusters.size(); i++){
             int csize = mDBClusters.get(i).getPoints().size();
             clusteredPhotos += csize;
-            mClusterOutputString += (csize + "");
+            clusterOutputString += (csize + "");
         }
         /**photos that are set to cluster -1*/
-        int unclusteredPhotos = Encodings.size() - clusteredPhotos;
-        mClusterOutputString = "Cluster counts : " + String.valueOf(unclusteredPhotos) + " " + mClusterOutputString;
+        int unclusteredPhotos = numPoints - clusteredPhotos;
+        clusterOutputString = "Cluster counts : " + String.valueOf(unclusteredPhotos) + " " + clusterOutputString;
 
-        MainActivity.clusterResultsText.setText(mClusterOutputString);
-        Log.d("cluster_debug", mClusterOutputString);
+        MainActivity.clusterResultsText.setText(clusterOutputString);
+        Log.d("cluster_debug", clusterOutputString);
     }
 
     /**get the cluster that the encoding belongs to*/

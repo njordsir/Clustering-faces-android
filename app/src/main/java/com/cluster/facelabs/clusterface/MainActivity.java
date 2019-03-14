@@ -11,12 +11,16 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +32,14 @@ public class MainActivity extends AppCompatActivity {
 
     public static EditText dBScanEpsText;
     public static EditText dBScanMinPtsText;
+    public static EditText kmeansKText;
+
+    public static Spinner clusterTypeSpinner;
+    public static String clusterMethod;
+    public static final String dbscan = "DBScan";
+    public static final String kmeans = "KMeans";
+
+    private TextView kDesc, epsDesc, minPtsDesc;
 
     public static TextView clusterResultsText;
 
@@ -58,6 +70,53 @@ public class MainActivity extends AppCompatActivity {
         dBScanMinPtsText = findViewById(R.id.dbscan_min_count);
 
         clusterResultsText = findViewById(R.id.cluster_output_text);
+
+        kmeansKText = findViewById(R.id.kmeans_cluster_count);
+
+        kDesc = findViewById(R.id.kmeans_cluster_count_desc);
+        epsDesc = findViewById(R.id.dbscan_eps_desc);
+        minPtsDesc = findViewById(R.id.dbscan_min_count_desc);
+
+        final ArrayList<View> dbscanViews = new ArrayList<>();
+        dbscanViews.add(epsDesc);
+        dbscanViews.add(dBScanEpsText);
+        dbscanViews.add(minPtsDesc);
+        dbscanViews.add(dBScanMinPtsText);
+
+        final ArrayList<View> kmeansViews = new ArrayList<>();
+        kmeansViews.add(kDesc);
+        kmeansViews.add(kmeansKText);
+
+        clusterTypeSpinner = findViewById(R.id.cluster_type_spinner);
+        List<String> categories = new ArrayList<>();
+        categories.add(dbscan); categories.add(kmeans);
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, categories);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        clusterTypeSpinner.setAdapter(spinnerAdapter);
+        clusterTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                clusterMethod = parent.getItemAtPosition(position).toString();
+                if(clusterMethod.equals(dbscan)){
+                    for(int i = 0; i < dbscanViews.size(); i++)
+                        dbscanViews.get(i).setVisibility(View.VISIBLE);
+                    for(int i = 0; i < kmeansViews.size(); i++)
+                        kmeansViews.get(i).setVisibility(View.GONE);
+
+                }
+                else if(clusterMethod.equals(kmeans)){
+                    for(int i = 0; i < dbscanViews.size(); i++)
+                        dbscanViews.get(i).setVisibility(View.GONE);
+                    for(int i = 0; i < kmeansViews.size(); i++)
+                        kmeansViews.get(i).setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         Encodings = null;
     }
@@ -154,13 +213,17 @@ public class MainActivity extends AppCompatActivity {
         if(clusteringHandler == null)
             clusteringHandler = new ClusteringHandler();
 
-        if(Encodings != null)
-            clusteringHandler.DBScanClustering(Encodings);
+        if(Encodings != null) {
+            if(clusterMethod.equals(dbscan))
+                clusteringHandler.DBScanClustering(Encodings);
+            else if(clusterMethod.equals(kmeans))
+                clusteringHandler.KMeansClustering(Encodings);
+        }
         else
             Utils.showToast(this, "No encodings to cluster!");
     }
 
     public void getResults(View view){
-        Utils.createResultsFolder(clusteringHandler, fbModelHandler);
+        Utils.createResultsFolder(clusteringHandler, Encodings);
     }
 }
