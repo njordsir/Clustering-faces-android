@@ -6,6 +6,7 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.HashMap;
 
 public class TfliteHandler
 {
@@ -31,11 +33,11 @@ public class TfliteHandler
     private final boolean IS_QUANT_MODEL = false;
 
     /**image dimensions*/
-    private final int DIM_X = 160;
-    private final int DIM_Y = 160;
-    private final int DIM_Z = 3;
+    private final int DIM_X = InferenceHelper.DIM_X;
+    private final int DIM_Y = InferenceHelper.DIM_Y;
+    private final int DIM_Z = InferenceHelper.DIM_Z;
     /**encoding dimension*/
-    private static final int DIM_ENCODING = 128;
+    private final int DIM_ENCODING = InferenceHelper.DIM_ENCODING;
 
     /**pre-whiten the images before passing through the network*/
     private final boolean mPreWhiten = true;
@@ -50,6 +52,8 @@ public class TfliteHandler
      * to a text file for decoding*/
     String encodingsAsString = "";
     String fileNamesAsString = "";
+
+    public HashMap<String, InferenceHelper.Encoding> mEncodings;
 
     /**constructor*/
     public TfliteHandler(Context context, Activity activity){
@@ -77,7 +81,7 @@ public class TfliteHandler
             return;
         }
         mFaceEncodingOutput = new float[1][DIM_ENCODING];
-
+        mEncodings = new HashMap<>();
         Utils.showToast(mContext, "Loaded model!");
     }
 
@@ -188,6 +192,25 @@ public class TfliteHandler
             Utils.showToast(mContext,"ERROR : Could not run inference!");
             return;
         }
+
+        mEncodings.put(fileName, new InferenceHelper.Encoding(mFaceEncodingOutput[0]));
+    }
+
+    private class AsycTfliteInferenceAll extends AsyncTask<File, Integer, Void> {
+        @Override
+        protected Void doInBackground(File... files) {
+            for(int i = 0; i < files.length; i++){
+                Bitmap bm = BitmapFactory.decodeFile(files[i].getAbsolutePath());
+                runTfliteInference(bm, files[i].getName());
+                publishProgress(i);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            MainActivity.encodingProgressBar.setProgress(values[0]);
+        }
     }
 
     public void runTfliteInferenceOnAllCrops(){
@@ -203,11 +226,6 @@ public class TfliteHandler
 
         MainActivity.encodingProgressBar.setMax(files.length + 1);
 
-        for (int i = 0; i < files.length; i++){
-            Log.d("encoding", files[i].getName());
-            Bitmap bm = BitmapFactory.decodeFile(files[i].getAbsolutePath());
-            runTfliteInference(bm, files[i].getName());
-            MainActivity.encodingProgressBar.incrementProgressBy(1);
-        }
+        new AsycTfliteInferenceAll().execute(files);
     }
 }

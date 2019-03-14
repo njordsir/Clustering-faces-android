@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     FaceHandler faceHandler = null;
     FirebaseModelHandler fbModelHandler = null;
     ClusteringHandler clusteringHandler = null;
+
+    HashMap<String, InferenceHelper.Encoding> Encodings;
 
     private static final int RC_STORAGE_PERMISSION = 0;
     private static final int RC_PHOTO_PICKER = 1;
@@ -55,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         dBScanMinPtsText = findViewById(R.id.dbscan_min_count);
 
         clusterResultsText = findViewById(R.id.cluster_output_text);
+
+        Encodings = null;
     }
 
     private void requestPermissions(){
@@ -135,19 +140,24 @@ public class MainActivity extends AppCompatActivity {
         if(tfliteHandler == null)
             tfliteHandler = new TfliteHandler(this, MainActivity.this);
         tfliteHandler.runTfliteInferenceOnAllCrops();
+        Encodings = tfliteHandler.mEncodings;
     }
 
     public void getFBEncodings(View view){
         if(fbModelHandler == null)
             fbModelHandler = new FirebaseModelHandler(this);
         fbModelHandler.runFBModelInferenceOnAllCrops();
+        Encodings = fbModelHandler.mEncodings;
     }
 
     public void getClusters(View view){
         if(clusteringHandler == null)
             clusteringHandler = new ClusteringHandler();
-        if(fbModelHandler != null)
-            clusteringHandler.DBScanClustering(fbModelHandler);
+
+        if(Encodings != null)
+            clusteringHandler.DBScanClustering(Encodings);
+        else
+            Utils.showToast(this, "No encodings to cluster!");
     }
 
     public void getResults(View view){

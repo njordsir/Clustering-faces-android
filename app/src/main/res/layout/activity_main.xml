@@ -155,7 +155,7 @@
             android:layout_marginEnd="8dp"
             android:text="Encode"
             android:textSize="13sp"
-            android:onClick="getFBEncodings"/>
+            android:onClick="getEncodings"/>
 
         <Button
             android:id="@+id/cluster_button"

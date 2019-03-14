@@ -3,6 +3,7 @@ package com.cluster.facelabs.clusterface;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +22,10 @@ public class ClusteringHandler {
     private float mDBScanEps = 7;
     private int mDBScanMinPts = 30;
 
-    public void DBScanClustering(FirebaseModelHandler fbHandler){
+    public void DBScanClustering(HashMap<String, Encoding> Encodings){
         /**get all encodings as double point vectors*/
         List<DoublePoint> dEncodings = new ArrayList<>();
-        Iterator it = fbHandler.mEncodings.entrySet().iterator();
+        Iterator it = Encodings.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry)it.next();
             Encoding encoding = (Encoding) pair.getValue();
@@ -56,7 +57,7 @@ public class ClusteringHandler {
             mClusterOutputString += (csize + "");
         }
         /**photos that are set to cluster -1*/
-        int unclusteredPhotos = fbHandler.mEncodings.size() - clusteredPhotos;
+        int unclusteredPhotos = Encodings.size() - clusteredPhotos;
         mClusterOutputString = "Cluster counts : " + String.valueOf(unclusteredPhotos) + " " + mClusterOutputString;
 
         MainActivity.clusterResultsText.setText(mClusterOutputString);
