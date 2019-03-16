@@ -1,5 +1,6 @@
 package com.cluster.facelabs.clusterface;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -21,54 +22,82 @@ public class ClusteringHandler {
     private float mDBScanEps = 7;
     private int mDBScanMinPts = 30;
 
+    String[] fileNames;
+    float[][] encodings;
     List<KMeans.Mean> bestKMeans;
-
     /**no. of iterations to run the kmeans clustering for*/
-    private static final int mClusterIter = 50;
+    private static final int mClusterIter = 100;
 
-    public void KMeansClustering(HashMap<String, Encoding> Encodings){
-        /**get all the encodings from the dictionary**/
+    private class AsyncKmeans extends AsyncTask<Void, Integer, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            KMeans kmeans = new KMeans();
+
+            /**get the number of desired cluster from user input*/
+            int k = Integer.parseInt(MainActivity.kmeansKText.getText().toString());
+
+            /**perform the clustering multiple times and choose the one with max score*/
+            double bestScore = 0;
+            bestKMeans = null;
+
+            for(int km = 0; km < mClusterIter; km ++) {
+                List<KMeans.Mean> means = kmeans.predict(k, encodings);
+                double score = KMeans.score(means);
+                if (score > bestScore) {
+                    bestKMeans = means;
+                    bestScore = score;
+                }
+                publishProgress(km);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            MainActivity.clusteringProgressBar.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            showKMeansOutput();
+        }
+    }
+
+    /**get all encodings from the hashmap*/
+    private void getFloatEncodings(HashMap<String, Encoding> Encodings){
+        int NUM_ENCODINGS = Encodings.size();
         int DIM_ENCODING = InferenceHelper.DIM_ENCODING;
-        float[][] encodings = new float[Encodings.size()][DIM_ENCODING];
+        fileNames = new String[NUM_ENCODINGS];
+        encodings = new float[NUM_ENCODINGS][DIM_ENCODING];
         Iterator it = Encodings.entrySet().iterator();
         int e = 0;
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry)it.next();
+            String fileName = pair.getKey().toString();
+            fileNames[e] = fileName;
             Encoding encoding = (Encoding) pair.getValue();
             System.arraycopy(encoding.enc, 0, encodings[e++], 0, DIM_ENCODING);
         }
-
-        KMeans kmeans = new KMeans();
-
-        /**get the number of desired cluster from user input*/
-        int k = Integer.parseInt(MainActivity.kmeansKText.getText().toString());
-
-        /**perform the clustering multiple times and choose the one with max score*/
-        double bestScore = 0;
-        bestKMeans = null;
-
-        for(int km = 0; km < mClusterIter; km ++) {
-            List<KMeans.Mean> means = kmeans.predict(k, encodings);
-            double score = KMeans.score(means);
-            if (score > bestScore) {
-                bestKMeans = means;
-                bestScore = score;
-            }
-        }
-
-        showKMeansOutput(Encodings);
     }
 
-    public void showKMeansOutput(HashMap<String, Encoding> Encodings){
+    public void KMeansClustering(HashMap<String, Encoding> Encodings){
+        getFloatEncodings(Encodings);
+
+        MainActivity.clusteringProgressBar.setMax(mClusterIter);
+        MainActivity.clusteringProgressBar.setProgress(0);
+
+        new AsyncKmeans().execute();
+    }
+
+    public void showKMeansOutput(){
         /**print the cluster for each crop*/
         int[] clusterSizes = new int[bestKMeans.size()]; //+1?
 
-        Iterator it = Encodings.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            String fileName = pair.getKey().toString();
-            Encoding encoding = (Encoding) pair.getValue();
-            KMeans.Mean nearestMean = KMeans.nearestMean(encoding.enc, bestKMeans);
+        for(int i = 0; i < encodings.length; i++){
+            String fileName = fileNames[i];
+            KMeans.Mean nearestMean = KMeans.nearestMean(encodings[i], bestKMeans);
             int clusterIdx = bestKMeans.indexOf(nearestMean);
             clusterSizes[clusterIdx] += 1;
             Log.d("cluster", fileName + " : " + clusterIdx);
