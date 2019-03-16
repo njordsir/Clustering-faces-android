@@ -67,6 +67,35 @@
             android:progress="0"/>
 
         <TextView
+            android:id="@+id/cw_graph_pbar_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Creating graph..."
+            android:textSize="18sp"
+            android:visibility="gone"/>
+        <ProgressBar
+            android:id="@+id/cw_graph_pbar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:padding="5dp"
+            android:progress="0"
+            android:visibility="gone"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clustering faces..."
+            android:textSize="18sp"/>
+        <ProgressBar
+            android:id="@+id/clustering_pbar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:padding="5dp"
+            android:progress="0"/>
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Saving results..."

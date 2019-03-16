@@ -1,6 +1,7 @@
 package com.cluster.facelabs.clusterface;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 
@@ -81,81 +82,99 @@ public class ChineseWhispersHandler {
         }
     }
 
-    public void performClustering(HashMap<String, Encoding> Encodings){
-        cwThreshold = Float.parseFloat(MainActivity.cwThreshText.getText().toString());
+    private class AsyncMakeGraph extends AsyncTask<Void, Integer, Void>{
 
-        getFloatEncodings(Encodings);
+        @Override
+        protected Void doInBackground(Void... voids) {
+            int NUM_ENCODINGS = encodings.length;
+            int DIM_ENCODING = encodings[0].length;
 
-        int NUM_ENCODINGS = Encodings.size();
-        int DIM_ENCODING = InferenceHelper.DIM_ENCODING;
-
-        graph = new Graph(NUM_ENCODINGS);
-
-        /**CREATE GRAPH
-         * ################################################*/
-        for(int i = 0; i < NUM_ENCODINGS; i++) {
-            float[] encoding = encodings[i];
-
-            if(i == NUM_ENCODINGS-1) break; /**if last encoding*/
-
-            for(int j = i+1; j < NUM_ENCODINGS; j++){
-                float[] nbrEncoding = encodings[j];
-                float dist = 0.0f;
-                for(int k = 0; k < DIM_ENCODING; k++)
-                    dist += encoding[k]*nbrEncoding[k];
-                if(dist > cwThreshold){
-                    graph.addEdge(i, j, dist);
-                }
-            }
-        }
-         /**###################################################*/
-
-        /**PERFORM CLUSTERING
-         * ################################################*/
-
-        Log.d("ChineseWhispers", "Starting clustering...");
-        for(int ci = 0; ci < cwIter; ci++){
-            Log.d("ChineseWhispers", "Iteration " + ci);
-            /**randomly loop through nodes*/
             for(int i = 0; i < NUM_ENCODINGS; i++) {
+                float[] encoding = encodings[i];
 
-                /**summed weights for the clusters of the nbrs*/
-                HashMap<Integer, Float> clusterWeights = new HashMap<>();
+                if(i == NUM_ENCODINGS-1) break; /**if last encoding*/
 
-                /**go through the nbrs and see which clusters they belong to*/
-                for(int j = 0; j < graph.adjLists[i].size(); j++){
-                    Edge nbrEdge = graph.adjLists[i].get(j);
-                    int nbr = nbrEdge.nbr;
-                    float nbrWt = nbrEdge.weight;
-                    int nbrCluster = graph.clusters[nbr];
-                    if(clusterWeights.containsKey(nbrCluster))
-                        clusterWeights.put(nbrCluster, clusterWeights.get(nbrCluster) + nbrWt);
-                    else
-                        clusterWeights.put(nbrCluster, nbrWt);
-                }
-
-                int maxCluster = -1;
-                float maxClusterWt = 0.0f;
-                Iterator it = clusterWeights.entrySet().iterator();
-                while (it.hasNext()){
-                    Map.Entry pair = (Map.Entry)it.next();
-                    int clusterId = (Integer) pair.getKey();
-                    float clusterWt = (Float) pair.getValue();
-                    if(clusterWt > maxClusterWt){
-                        maxClusterWt = clusterWt;
-                        maxCluster = clusterId;
+                for(int j = i+1; j < NUM_ENCODINGS; j++){
+                    float[] nbrEncoding = encodings[j];
+                    float dist = 0.0f;
+                    for(int k = 0; k < DIM_ENCODING; k++)
+                        dist += encoding[k]*nbrEncoding[k];
+                    if(dist > cwThreshold){
+                        graph.addEdge(i, j, dist);
                     }
                 }
-                graph.clusters[i] = maxCluster;
+                publishProgress(i);
             }
-        }
-        Log.d("ChineseWhispers", "Clustering done!");
-        /**#######################################################################*/
 
-        /**PRINT CLUSTER SIZES
-         * ################################################*/
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            MainActivity.cwGraphProgressBar.setProgress(values[0]);
+        }
+    }
+
+    private class AsyncCWClustering extends AsyncTask<Void, Integer, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            int NUM_ENCODINGS = encodings.length;
+
+            for(int ci = 0; ci < cwIter; ci++){
+                /**randomly loop through nodes*/
+                for(int i = 0; i < NUM_ENCODINGS; i++) {
+
+                    /**summed weights for the clusters of the nbrs*/
+                    HashMap<Integer, Float> clusterWeights = new HashMap<>();
+
+                    /**go through the nbrs and see which clusters they belong to*/
+                    for(int j = 0; j < graph.adjLists[i].size(); j++){
+                        Edge nbrEdge = graph.adjLists[i].get(j);
+                        int nbr = nbrEdge.nbr;
+                        float nbrWt = nbrEdge.weight;
+                        int nbrCluster = graph.clusters[nbr];
+                        if(clusterWeights.containsKey(nbrCluster))
+                            clusterWeights.put(nbrCluster, clusterWeights.get(nbrCluster) + nbrWt);
+                        else
+                            clusterWeights.put(nbrCluster, nbrWt);
+                    }
+
+                    int maxCluster = -1;
+                    float maxClusterWt = 0.0f;
+                    Iterator it = clusterWeights.entrySet().iterator();
+                    while (it.hasNext()){
+                        Map.Entry pair = (Map.Entry)it.next();
+                        int clusterId = (Integer) pair.getKey();
+                        float clusterWt = (Float) pair.getValue();
+                        if(clusterWt > maxClusterWt){
+                            maxClusterWt = clusterWt;
+                            maxCluster = clusterId;
+                        }
+                    }
+                    graph.clusters[i] = maxCluster;
+                }
+
+                publishProgress(ci);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            MainActivity.clusteringProgressBar.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            printClusterSizes();
+        }
+    }
+
+    private void printClusterSizes(){
         HashMap<Integer, Integer> clusterSizes = new HashMap<>();
-        for(int i = 0; i < NUM_ENCODINGS; i++){
+        for(int i = 0; i < graph.clusters.length; i++){
             if(clusterSizes.containsKey(graph.clusters[i]))
                 clusterSizes.put(graph.clusters[i], clusterSizes.get(graph.clusters[i]) + 1);
             else
@@ -173,7 +192,26 @@ public class ChineseWhispersHandler {
             clusterOutputString += (String.valueOf(size) + " ");
         }
         MainActivity.clusterResultsText.setText(clusterOutputString);
+    }
 
+    public void performClustering(HashMap<String, Encoding> Encodings){
+        cwThreshold = Float.parseFloat(MainActivity.cwThreshText.getText().toString());
+
+        getFloatEncodings(Encodings);
+
+        int NUM_ENCODINGS = Encodings.size();
+
+        graph = new Graph(NUM_ENCODINGS);
+
+        /**CREATE GRAPH*/
+        MainActivity.cwGraphProgressBar.setMax(NUM_ENCODINGS);
+        MainActivity.cwGraphProgressBar.setProgress(0);
+        new AsyncMakeGraph().execute();
+
+        /**PERFORM CLUSTERING*/
+        MainActivity.clusteringProgressBar.setMax(cwIter);
+        MainActivity.clusteringProgressBar.setProgress(0);
+        new AsyncCWClustering().execute();
     }
 
     public void saveResults(){

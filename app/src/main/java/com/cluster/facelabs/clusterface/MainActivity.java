@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     public static ProgressBar encodingQueueProgressBar;
     public static ProgressBar encodingProgressBar;
     public static ProgressBar saveResultsProgressBar;
+    public static ProgressBar clusteringProgressBar;
+    public static ProgressBar cwGraphProgressBar;
 
     public static EditText dBScanEpsText;
     public static EditText dBScanMinPtsText;
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String kmeans = "KMeans";
     public static final String cw = "ChineseWhispers";
 
-    private TextView kDesc, epsDesc, minPtsDesc, cwThreshDesc;
+    private TextView kDesc, epsDesc, minPtsDesc, cwThreshDesc, cwGraphProgressDesc;
 
     public static TextView clusterResultsText;
 
@@ -68,11 +70,14 @@ public class MainActivity extends AppCompatActivity {
         encodingQueueProgressBar = findViewById(R.id.encoding_queue_pbar);
         encodingProgressBar = findViewById(R.id.encoding_pbar);
         saveResultsProgressBar = findViewById(R.id.save_results_pbar);
+        clusteringProgressBar = findViewById(R.id.clustering_pbar);
+        cwGraphProgressBar = findViewById(R.id.cw_graph_pbar);
 
         kDesc = findViewById(R.id.kmeans_cluster_count_desc);
         epsDesc = findViewById(R.id.dbscan_eps_desc);
         minPtsDesc = findViewById(R.id.dbscan_min_count_desc);
         cwThreshDesc = findViewById(R.id.cw_threshold_desc);
+        cwGraphProgressDesc = findViewById(R.id.cw_graph_pbar_desc);
 
         dBScanEpsText = findViewById(R.id.dbscan_eps);
         dBScanMinPtsText = findViewById(R.id.dbscan_min_count);
@@ -94,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<View> cwViews = new ArrayList<>();
         cwViews.add(cwThreshDesc);
         cwViews.add(cwThreshText);
+        cwViews.add(cwGraphProgressDesc);
+        cwViews.add(cwGraphProgressBar);
 
         clusterTypeSpinner = findViewById(R.id.cluster_type_spinner);
         List<String> categories = new ArrayList<>();
