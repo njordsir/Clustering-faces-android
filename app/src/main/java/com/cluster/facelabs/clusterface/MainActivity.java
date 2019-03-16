@@ -33,13 +33,15 @@ public class MainActivity extends AppCompatActivity {
     public static EditText dBScanEpsText;
     public static EditText dBScanMinPtsText;
     public static EditText kmeansKText;
+    public static EditText cwThreshText;
 
     public static Spinner clusterTypeSpinner;
     public static String clusterMethod;
     public static final String dbscan = "DBScan";
     public static final String kmeans = "KMeans";
+    public static final String cw = "ChineseWhispers";
 
-    private TextView kDesc, epsDesc, minPtsDesc;
+    private TextView kDesc, epsDesc, minPtsDesc, cwThreshDesc;
 
     public static TextView clusterResultsText;
 
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     FaceHandler faceHandler = null;
     FirebaseModelHandler fbModelHandler = null;
     ClusteringHandler clusteringHandler = null;
+    ChineseWhispersHandler cwHandler = null;
 
     HashMap<String, InferenceHelper.Encoding> Encodings;
 
@@ -66,16 +69,17 @@ public class MainActivity extends AppCompatActivity {
         encodingProgressBar = findViewById(R.id.encoding_pbar);
         saveResultsProgressBar = findViewById(R.id.save_results_pbar);
 
-        dBScanEpsText = findViewById(R.id.dbscan_eps);
-        dBScanMinPtsText = findViewById(R.id.dbscan_min_count);
-
-        clusterResultsText = findViewById(R.id.cluster_output_text);
-
-        kmeansKText = findViewById(R.id.kmeans_cluster_count);
-
         kDesc = findViewById(R.id.kmeans_cluster_count_desc);
         epsDesc = findViewById(R.id.dbscan_eps_desc);
         minPtsDesc = findViewById(R.id.dbscan_min_count_desc);
+        cwThreshDesc = findViewById(R.id.cw_threshold_desc);
+
+        dBScanEpsText = findViewById(R.id.dbscan_eps);
+        dBScanMinPtsText = findViewById(R.id.dbscan_min_count);
+        kmeansKText = findViewById(R.id.kmeans_cluster_count);
+        cwThreshText = findViewById(R.id.cw_threshold);
+
+        clusterResultsText = findViewById(R.id.cluster_output_text);
 
         final ArrayList<View> dbscanViews = new ArrayList<>();
         dbscanViews.add(epsDesc);
@@ -87,9 +91,15 @@ public class MainActivity extends AppCompatActivity {
         kmeansViews.add(kDesc);
         kmeansViews.add(kmeansKText);
 
+        final ArrayList<View> cwViews = new ArrayList<>();
+        cwViews.add(cwThreshDesc);
+        cwViews.add(cwThreshText);
+
         clusterTypeSpinner = findViewById(R.id.cluster_type_spinner);
         List<String> categories = new ArrayList<>();
-        categories.add(dbscan); categories.add(kmeans);
+        categories.add(dbscan);
+        categories.add(kmeans);
+        categories.add(cw);
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, categories);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         clusterTypeSpinner.setAdapter(spinnerAdapter);
@@ -102,13 +112,24 @@ public class MainActivity extends AppCompatActivity {
                         dbscanViews.get(i).setVisibility(View.VISIBLE);
                     for(int i = 0; i < kmeansViews.size(); i++)
                         kmeansViews.get(i).setVisibility(View.GONE);
-
+                    for(int i = 0; i < cwViews.size(); i++)
+                        cwViews.get(i).setVisibility(View.GONE);
                 }
                 else if(clusterMethod.equals(kmeans)){
                     for(int i = 0; i < dbscanViews.size(); i++)
                         dbscanViews.get(i).setVisibility(View.GONE);
                     for(int i = 0; i < kmeansViews.size(); i++)
                         kmeansViews.get(i).setVisibility(View.VISIBLE);
+                    for(int i = 0; i < cwViews.size(); i++)
+                        cwViews.get(i).setVisibility(View.GONE);
+                }
+                else if(clusterMethod.equals(cw)){
+                    for(int i = 0; i < dbscanViews.size(); i++)
+                        dbscanViews.get(i).setVisibility(View.GONE);
+                    for(int i = 0; i < kmeansViews.size(); i++)
+                        kmeansViews.get(i).setVisibility(View.GONE);
+                    for(int i = 0; i < cwViews.size(); i++)
+                        cwViews.get(i).setVisibility(View.VISIBLE);
                 }
             }
 
@@ -210,20 +231,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getClusters(View view){
-        if(clusteringHandler == null)
-            clusteringHandler = new ClusteringHandler();
+        if(Encodings == null){
+            Utils.showToast(this, "No encodings to cluster!");
+            return;
+        }
+        if(clusterMethod.equals(cw)){
+            if(cwHandler == null)
+                cwHandler = new ChineseWhispersHandler(this);
 
-        if(Encodings != null) {
-            if(clusterMethod.equals(dbscan))
+            cwHandler.performClustering(Encodings);
+        }else {
+            if (clusteringHandler == null)
+                clusteringHandler = new ClusteringHandler();
+
+            if (clusterMethod.equals(dbscan))
                 clusteringHandler.DBScanClustering(Encodings);
-            else if(clusterMethod.equals(kmeans))
+            else if (clusterMethod.equals(kmeans))
                 clusteringHandler.KMeansClustering(Encodings);
         }
-        else
-            Utils.showToast(this, "No encodings to cluster!");
     }
 
     public void getResults(View view){
-        Utils.createResultsFolder(clusteringHandler, Encodings);
+        if(clusterMethod.equals(cw)){
+            if(cwHandler == null){
+                Utils.showToast(this, "No results to save!");
+                return;
+            }
+            cwHandler.saveResults();
+        }else {
+            if(clusteringHandler == null){
+                Utils.showToast(this, "No results to save!");
+                return;
+            }
+            Utils.createResultsFolder(clusteringHandler, Encodings);
+        }
     }
 }

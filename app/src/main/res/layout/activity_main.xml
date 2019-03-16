@@ -123,6 +123,18 @@
             android:layout_height="wrap_content"
             android:text="30"
             android:inputType="number"/>
+        <TextView
+            android:id="@+id/cw_threshold_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Threshold"
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/cw_threshold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="80"
+            android:inputType="number"/>
 
         <TextView
             android:layout_width="match_parent"
