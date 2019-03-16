@@ -113,6 +113,13 @@ public class ChineseWhispersHandler {
         protected void onProgressUpdate(Integer... values) {
             MainActivity.cwGraphProgressBar.setProgress(values[0]);
         }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            MainActivity.clusteringProgressBar.setMax(cwIter);
+            MainActivity.clusteringProgressBar.setProgress(0);
+            new AsyncCWClustering().execute();
+        }
     }
 
     private class AsyncCWClustering extends AsyncTask<Void, Integer, Void>{
@@ -207,11 +214,6 @@ public class ChineseWhispersHandler {
         MainActivity.cwGraphProgressBar.setMax(NUM_ENCODINGS);
         MainActivity.cwGraphProgressBar.setProgress(0);
         new AsyncMakeGraph().execute();
-
-        /**PERFORM CLUSTERING*/
-        MainActivity.clusteringProgressBar.setMax(cwIter);
-        MainActivity.clusteringProgressBar.setProgress(0);
-        new AsyncCWClustering().execute();
     }
 
     public void saveResults(){
