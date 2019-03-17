@@ -1,6 +1,6 @@
 package com.cluster.facelabs.clusterface;
 
-import org.apache.commons.math3.ml.clustering.DoublePoint;
+import java.io.Serializable;
 
 /**
  * Created by shankar.g on 3/13/2019.
@@ -15,7 +15,7 @@ public class InferenceHelper {
     /**encoding dimension*/
     public static final int DIM_ENCODING = 128;
 
-    public static class Encoding{
+    public static class Encoding implements Serializable{
         float[] enc;
 
         Encoding(float[] values){

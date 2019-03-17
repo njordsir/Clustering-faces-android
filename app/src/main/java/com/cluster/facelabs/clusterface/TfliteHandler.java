@@ -81,7 +81,9 @@ public class TfliteHandler
             return;
         }
         mFaceEncodingOutput = new float[1][DIM_ENCODING];
-        mEncodings = new HashMap<>();
+        mEncodings = Utils.loadEncodings();
+        if(mEncodings == null)
+            mEncodings = new HashMap<>();
         Utils.showToast(mContext, "Loaded model!");
     }
 
@@ -200,6 +202,13 @@ public class TfliteHandler
         @Override
         protected Void doInBackground(File... files) {
             for(int i = 0; i < files.length; i++){
+                /**if encoding for this crop already exists, skip*/
+                if(mEncodings.containsKey(files[i].getName())){
+                    Log.e("savedEncodings", "Encoding already exists");
+                    publishProgress(i);
+                    continue;
+                }
+
                 Bitmap bm = BitmapFactory.decodeFile(files[i].getAbsolutePath());
                 runTfliteInference(bm, files[i].getName());
                 publishProgress(i);
@@ -210,6 +219,11 @@ public class TfliteHandler
         @Override
         protected void onProgressUpdate(Integer... values) {
             MainActivity.encodingProgressBar.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Utils.saveEncodings(mContext, mEncodings);
         }
     }
 

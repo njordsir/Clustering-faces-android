@@ -11,9 +11,12 @@ import android.widget.Toast;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -152,4 +155,42 @@ public class Utils
     }
 
     //TODO : use asynctask for saving files
+
+    public static void saveEncodings(Context context, HashMap<String, Encoding> Encodings){
+        String encPath = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES) + "/Clusterface/encodings.enc";
+        File file = new File(encPath);
+        ObjectOutputStream outputStream = null;
+        try {
+            outputStream = new ObjectOutputStream(new FileOutputStream(file));
+            outputStream.writeObject(Encodings);
+            outputStream.flush();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showToast(context, "Unable to save encodings!");
+            Log.e("saveEncodings", "Unable to save encodings!");
+        }
+    }
+
+    public static HashMap<String, Encoding> loadEncodings(){
+        String encPath = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES) + "/Clusterface/encodings.enc";
+        File file = new File(encPath);
+
+        if(!file.exists())
+            return null;
+
+        HashMap<String, Encoding> encodings = null;
+        ObjectInputStream inputStream = null;
+        try {
+            inputStream = new ObjectInputStream(new FileInputStream(file));
+            encodings = (HashMap<String, Encoding>) inputStream.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return encodings;
+    }
 }

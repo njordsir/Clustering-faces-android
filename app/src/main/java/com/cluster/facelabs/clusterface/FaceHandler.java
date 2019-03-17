@@ -18,6 +18,8 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -116,10 +118,11 @@ public class FaceHandler {
             int height = face.getBoundingBox().height();
             //showToast("("+String.valueOf(left) + "," + String.valueOf(top) + "),(" + String.valueOf(width) + "," + String.valueOf(height) + ")");
 
+
             /**create a bitmap for identified face*/
             try {
                 Bitmap croppedFace = Bitmap.createBitmap(inputImg, left, top, width, height);
-                String savedPath = Utils.saveImage(croppedFace, imageName, String.valueOf(i++));
+                Utils.saveImage(croppedFace, imageName, String.valueOf(i++));
             }catch (IllegalArgumentException e){
                 Log.d("finding", "Illegal argument to crop!");
             }
@@ -152,9 +155,17 @@ public class FaceHandler {
         MainActivity.faceProgressbar.setProgress(0);
 
         for (int i = 0; i < files.length; i++){
-            final String fileName = files[i].getName();
-            Log.d("finding faces", fileName);
+            final String fileName = FilenameUtils.removeExtension(files[i].getName());
+            /**if crops for this input image have been already found, skip*/
+            File cropCheck = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops/" + fileName + "_0.jpg");
+            if(cropCheck.exists()){
+                Log.d("finding faces", "Crops already present for file " + fileName);
+                MainActivity.faceQueueProgressbar.incrementProgressBy(1);
+                MainActivity.faceProgressbar.incrementProgressBy(1);
+                continue;
+            }
 
+            Log.d("finding faces", fileName);
             /**runFaceRecognition(Uri.fromFile(files[i]), null);
              * this gives error and loads images with the wrong orientation etc
              * cropping seems to always fix this
