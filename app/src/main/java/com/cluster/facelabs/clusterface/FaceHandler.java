@@ -26,6 +26,14 @@ import java.util.List;
 
 public class FaceHandler {
 
+    int mIdx = -1;
+    File[] files;
+    /*[TODO]
+    * Queue up-to 5 instead of just 1
+    * */
+    int mQueueCounter = 0;
+    int mQueueMax = 5;
+
     private Context mContext;
 
     public FaceHandler(Context context){
@@ -71,7 +79,10 @@ public class FaceHandler {
                             @Override
                             public void onSuccess(List<FirebaseVisionFace> firebaseVisionFaces) {
                                 processFaceRecognitionResult(firebaseVisionFaces,
-                                                imagePath, bitmap, imageName);
+                                        imagePath, bitmap, imageName);
+
+                                next();
+
                             }
                         })
                 .addOnFailureListener(
@@ -81,6 +92,7 @@ public class FaceHandler {
                                 // Task failed with an exception
                                 e.printStackTrace();
                                 Utils.showToast(mContext, "Face detector failed!");
+                                next();
                             }
                         });
     }
@@ -143,7 +155,7 @@ public class FaceHandler {
             return;
         }
 
-        File[] files = inputDir.listFiles();
+        files = inputDir.listFiles();
         if(files == null){
             Utils.showToast(mContext, "ERROR : No files found in the input folder!");
             return;
@@ -154,31 +166,34 @@ public class FaceHandler {
         MainActivity.faceProgressbar.setMax(files.length);
         MainActivity.faceProgressbar.setProgress(0);
 
-        for (int i = 0; i < files.length; i++){
-            final String fileName = FilenameUtils.removeExtension(files[i].getName());
-            /**if crops for this input image have been already found, skip*/
-            File cropCheck = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops/" + fileName + "_0.jpg");
-            if(cropCheck.exists()){
-                Log.d("finding faces", "Crops already present for file " + fileName);
-                MainActivity.faceQueueProgressbar.incrementProgressBy(1);
-                MainActivity.faceProgressbar.incrementProgressBy(1);
-                continue;
-            }
+        next();
+    }
 
-            Log.d("finding faces", fileName);
+    private void next(){
+        mIdx++;
+        final String fileName = FilenameUtils.removeExtension(files[mIdx].getName());
+        /**if crops for this input image have been already found, skip*/
+        String cropCheckName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops/" + fileName + "_0.jpg";
+        File cropCheck = new File(cropCheckName);
+        Log.e("finding faces", cropCheckName);
+        if(cropCheck.exists()){
+            MainActivity.faceQueueProgressbar.incrementProgressBy(1);
+            MainActivity.faceProgressbar.incrementProgressBy(1);
+            Log.d("finding faces", "Crop exists!");
+            next();
+        }else{
+            Log.d("finding faces", "Processing...");
+
             /**runFaceRecognition(Uri.fromFile(files[i]), null);
              * this gives error and loads images with the wrong orientation etc
              * cropping seems to always fix this
              * using glide to load bitmap from file with center cropping*/
-
-            Glide.with(mContext).asBitmap().load(files[i])
+            Glide.with(mContext).asBitmap().load(files[mIdx])
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
                             runFaceRecognition(null, resource, fileName);}});
-
             MainActivity.faceQueueProgressbar.incrementProgressBy(1);
-            Log.d("finding faces", "Done!");
         }
     }
 
