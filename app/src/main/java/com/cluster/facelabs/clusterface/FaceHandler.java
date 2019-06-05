@@ -171,6 +171,7 @@ public class FaceHandler {
 
     private void next(){
         mIdx++;
+        if(mIdx >= files.length) return;
         final String fileName = FilenameUtils.removeExtension(files[mIdx].getName());
         /**if crops for this input image have been already found, skip*/
         String cropCheckName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops/" + fileName + "_0.jpg";
