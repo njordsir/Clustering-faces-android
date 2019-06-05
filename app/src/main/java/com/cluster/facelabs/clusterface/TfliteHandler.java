@@ -26,8 +26,6 @@ public class TfliteHandler
     private Context mContext;
 
     private Interpreter mTfliteIntepreter;
-    /**file name of the tflite model*/
-    private final String LOCAL_MODEL_ASSET = "sandberg.tflite";
     /**is the tflite model quantized?
      * will change the size of bytebuffer in the method "convertBitmapToByteBuffer"*/
     private final boolean IS_QUANT_MODEL = false;
@@ -63,7 +61,7 @@ public class TfliteHandler
 
     /** Memory-map the model file in Assets. */
     private MappedByteBuffer loadModelFile(Activity activity) throws IOException {
-        AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(LOCAL_MODEL_ASSET);
+        AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(InferenceHelper.LOCAL_MODEL_ASSET);
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel = inputStream.getChannel();
         long startOffset = fileDescriptor.getStartOffset();

@@ -8,6 +8,7 @@ import java.io.Serializable;
 
 public class InferenceHelper {
 
+    public static final String LOCAL_MODEL_ASSET = "sandberg.tflite";
     /**image dimensions*/
     public static final int DIM_X = 160;
     public static final int DIM_Y = 160;

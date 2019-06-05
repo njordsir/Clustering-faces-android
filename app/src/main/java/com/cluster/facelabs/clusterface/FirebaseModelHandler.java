@@ -34,9 +34,6 @@ public class FirebaseModelHandler {
     private FirebaseModelInterpreter mInterpreter;
     private FirebaseModelInputOutputOptions mInputOutputOptions;
 
-    /**file name of the tflite model*/
-    private final String LOCAL_MODEL_ASSET = "sandberg.tflite";
-
     /**is the tflite model quantized?
      * will change the size of bytebuffer in the method "convertBitmapToByteBuffer"*/
     private final boolean IS_QUANT_MODEL = false;
@@ -79,7 +76,7 @@ public class FirebaseModelHandler {
 
             FirebaseLocalModelSource localSource =
                     new FirebaseLocalModelSource.Builder("asset")
-                            .setAssetFilePath(LOCAL_MODEL_ASSET).build();
+                            .setAssetFilePath(InferenceHelper.LOCAL_MODEL_ASSET).build();
 
             FirebaseModelManager manager = FirebaseModelManager.getInstance();
             manager.registerLocalModelSource(localSource);
