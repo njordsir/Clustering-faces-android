@@ -161,6 +161,21 @@ public class FaceHandler {
             return;
         }
 
+        /**remove the crops from the crops folder
+         * for which the input image is no longer present*/
+        File cropsDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops");
+        if(cropsDir.exists())
+        {
+            for(File crop : cropsDir.listFiles())
+            {
+                String cropName = FilenameUtils.removeExtension(crop.getName());
+                String possibleInputName  = cropName.substring(0, cropName.lastIndexOf('_')) + "." + FilenameUtils.getExtension(crop.getName());
+                File possibleInput = new File(inputDirPath + "/" + possibleInputName);
+                if(!possibleInput.exists())
+                    crop.delete();
+            }
+        }
+
         MainActivity.faceQueueProgressbar.setMax(files.length);
         MainActivity.faceQueueProgressbar.setProgress(0);
         MainActivity.faceProgressbar.setMax(files.length);

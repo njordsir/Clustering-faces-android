@@ -52,6 +52,7 @@ public class TfliteHandler
     String fileNamesAsString = "";
 
     public HashMap<String, InferenceHelper.Encoding> mEncodings;
+    public HashMap<String, InferenceHelper.Encoding> prevEncodings;
 
     /**constructor*/
     public TfliteHandler(Context context, Activity activity){
@@ -79,9 +80,8 @@ public class TfliteHandler
             return;
         }
         mFaceEncodingOutput = new float[1][DIM_ENCODING];
-        mEncodings = Utils.loadEncodings();
-        if(mEncodings == null)
-            mEncodings = new HashMap<>();
+        prevEncodings = Utils.loadEncodings();
+        mEncodings = new HashMap<>();
         Utils.showToast(mContext, "Loaded model!");
     }
 
@@ -200,9 +200,11 @@ public class TfliteHandler
         @Override
         protected Void doInBackground(File... files) {
             for(int i = 0; i < files.length; i++){
+                String fname = files[i].getName();
                 /**if encoding for this crop already exists, skip*/
-                if(mEncodings.containsKey(files[i].getName())){
+                if(prevEncodings != null && prevEncodings.containsKey(fname)){
                     Log.e("savedEncodings", "Encoding already exists");
+                    mEncodings.put(fname, prevEncodings.get(fname));
                     publishProgress(i);
                     continue;
                 }
