@@ -44,14 +44,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Queueing face encoders..."
-            android:textSize="18sp"/>
+            android:textSize="18sp"
+            android:visibility="gone"/>
         <ProgressBar
             android:id="@+id/encoding_queue_pbar"
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="match_parent"
             android:layout_height="20dp"
             android:padding="5dp"
-            android:progress="0"/>
+            android:progress="0"
+            android:visibility="gone"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -180,68 +182,85 @@
     </LinearLayout>
 
     <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="0.1"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp"
-    android:orientation="horizontal">
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.2"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/select_photos_button"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="8dp"
-            android:text="Select"
-            android:textSize="13sp"
-            android:onClick="selectInputPhotos"/>
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/get_faces_button"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="8dp"
-            android:text="Faces"
-            android:textSize="13sp"
-            android:onClick="getFaces"/>
+            <Button
+                android:id="@+id/select_photos_button"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:text="Pick\nPhotos"
+                android:textSize="12sp"
+                android:onClick="selectInputPhotos"/>
 
-        <Button
-            android:id="@+id/get_encodings_button"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="8dp"
-            android:text="Encode"
-            android:textSize="13sp"
-            android:onClick="getEncodings"/>
+            <Button
+                android:id="@+id/get_faces_button"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:text="Get\nFaces"
+                android:textSize="12sp"
+                android:onClick="getFaces"/>
 
-        <Button
-            android:id="@+id/cluster_button"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="8dp"
-            android:text="Cluster"
-            android:textSize="13sp"
-            android:onClick="getClusters"/>
+            <Button
+                android:id="@+id/get_encodings_button"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:text="Encode\nFaces"
+                android:textSize="12sp"
+                android:onClick="getEncodings"/>
 
-        <Button
-            android:id="@+id/save_results_button"
-            android:layout_width="0dp"
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="8dp"
-            android:text="Result"
-            android:textSize="13sp"
-            android:onClick="getResults"/>
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/cluster_button"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:text="Group\nFaces"
+                android:textSize="12sp"
+                android:onClick="getClusters"/>
+
+            <Button
+                android:id="@+id/save_results_button"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:text="Save\nResults"
+                android:textSize="12sp"
+                android:onClick="getResults"/>
+
+        </LinearLayout>
 
     </LinearLayout>
+
+
 
 </LinearLayout>

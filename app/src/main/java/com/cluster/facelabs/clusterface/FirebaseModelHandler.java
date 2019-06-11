@@ -242,8 +242,7 @@ public class FirebaseModelHandler {
     }
 
     public void runFBModelInferenceOnAllCrops(){
-        String cropsDirPath = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops";
+        String cropsDirPath = Utils.getCropsPath();
         File cropsDir = new File(cropsDirPath);
 
         File[] files = cropsDir.listFiles();

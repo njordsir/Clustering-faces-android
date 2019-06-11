@@ -223,8 +223,8 @@ public class ChineseWhispersHandler {
         }
 
         /**Save results*/
-        String cropsDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops";
-        String resultsDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Results";
+        String cropsDirPath = Utils.getCropsPath();
+        String resultsDirPath = Utils.getResultsPath();
         File resultsDir = new File(resultsDirPath);
 
         try {FileUtils.deleteDirectory(resultsDir);}

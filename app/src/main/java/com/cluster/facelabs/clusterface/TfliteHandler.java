@@ -46,11 +46,6 @@ public class TfliteHandler
     /**placeholder for the output encoding of the model*/
     private float [][] mFaceEncodingOutput = null;
 
-    /**write all the crop names and crop encodings
-     * to a text file for decoding*/
-    String encodingsAsString = "";
-    String fileNamesAsString = "";
-
     public HashMap<String, InferenceHelper.Encoding> mEncodings;
     public HashMap<String, InferenceHelper.Encoding> prevEncodings;
 
@@ -99,7 +94,7 @@ public class TfliteHandler
                 sum += Color.blue(val);
             }
         }
-        mean = sum/size;
+        mean = (float)sum/size;
 
         pixel = 0;
         float var = 0;
@@ -141,24 +136,18 @@ public class TfliteHandler
                 }
             }
         }else{
-            if(mPreWhiten){
+            /**default values for mean and std*/
+            mean = 128.0f;
+            std = 128.0f;
+            /**calculate mean and std needed for pre-whitening*/
+            if(mPreWhiten)
                 findMeanAndStd();
-                for (int i = 0; i < DIM_X; ++i) {
-                    for (int j = 0; j < DIM_Y; ++j) {
-                        final int val = mIntValues[pixel++];
-                        imgData.putFloat((byte) (((val >> 16) & 0xFF) -mean )/ (std));
-                        imgData.putFloat((byte) (((val >> 8) & 0xFF) - mean)/ (std));
-                        imgData.putFloat((byte) ((val & 0xFF)-mean) / (std));
-                    }
-                }
-            }else{
-                for (int i = 0; i < DIM_X; ++i) {
-                    for (int j = 0; j < DIM_Y; ++j) {
-                        final int val = mIntValues[pixel++];
-                        imgData.putFloat((byte) (((val >> 16) & 0xFF) - 128 )/ (128.0f));
-                        imgData.putFloat((byte) (((val >> 8) & 0xFF) - 128)/ (128.0f));
-                        imgData.putFloat((byte) ((val & 0xFF) - 128) / (128.0f));
-                    }
+            for (int i = 0; i < DIM_X; ++i) {
+                for (int j = 0; j < DIM_Y; ++j) {
+                    final int val = mIntValues[pixel++];
+                    imgData.putFloat((byte) (((val >> 16) & 0xFF) -mean )/ (std));
+                    imgData.putFloat((byte) (((val >> 8) & 0xFF) - mean)/ (std));
+                    imgData.putFloat((byte) ((val & 0xFF)-mean) / (std));
                 }
             }
         }
@@ -228,8 +217,7 @@ public class TfliteHandler
     }
 
     public void runTfliteInferenceOnAllCrops(){
-        String cropsDirPath = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops";
+        String cropsDirPath = Utils.getCropsPath();
         File cropsDir = new File(cropsDirPath);
 
         File[] files = cropsDir.listFiles();

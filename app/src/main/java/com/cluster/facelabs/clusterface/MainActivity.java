@@ -230,12 +230,13 @@ public class MainActivity extends AppCompatActivity {
         Encodings = tfliteHandler.mEncodings;
     }
 
+    /*
     public void getFBEncodings(View view){
         if(fbModelHandler == null)
             fbModelHandler = new FirebaseModelHandler(this);
         fbModelHandler.runFBModelInferenceOnAllCrops();
         Encodings = fbModelHandler.mEncodings;
-    }
+    }*/
 
     public void getClusters(View view){
         if(Encodings == null){

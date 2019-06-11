@@ -145,9 +145,7 @@ public class FaceHandler {
 
     /**find faces for all images in the input directory*/
     public void getCrops(){
-        String inputDirPath = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES)
-                + "/Clusterface/Input";
+        String inputDirPath = Utils.getInputPath();
 
         File inputDir = new File(inputDirPath);
         if(!inputDir.exists()) {
@@ -163,7 +161,7 @@ public class FaceHandler {
 
         /**remove the crops from the crops folder
          * for which the input image is no longer present*/
-        File cropsDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops");
+        File cropsDir = new File(Utils.getCropsPath());
         if(cropsDir.exists())
         {
             for(File crop : cropsDir.listFiles())
@@ -189,7 +187,7 @@ public class FaceHandler {
         if(mIdx >= files.length) return;
         final String fileName = FilenameUtils.removeExtension(files[mIdx].getName());
         /**if crops for this input image have been already found, skip*/
-        String cropCheckName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops/" + fileName + "_0.jpg";
+        String cropCheckName = Utils.getCropsPath() + "/" + fileName + "_0.jpg";
         File cropCheck = new File(cropCheckName);
         Log.e("finding faces", cropCheckName);
         if(cropCheck.exists()){

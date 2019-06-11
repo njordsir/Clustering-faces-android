@@ -40,17 +40,15 @@ public class Utils
 
         // Create the new file in the external storage
         String imageFileName = origFileName + "_" + faceIdx + ".jpg";
-        File storageDir = new File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                        + "/Clusterface/Crops");
+        File cropsDir = new File(Utils.getCropsPath());
         boolean success = true;
-        if (!storageDir.exists()) {
-            success = storageDir.mkdirs();
+        if (!cropsDir.exists()) {
+            success = cropsDir.mkdirs();
         }
 
         // Save the new Bitmap
         if (success) {
-            File imageFile = new File(storageDir, imageFileName);
+            File imageFile = new File(cropsDir, imageFileName);
             savedImagePath = imageFile.getAbsolutePath();
             try {
                 OutputStream fOut = new FileOutputStream(imageFile);
@@ -70,8 +68,7 @@ public class Utils
     }
 
     public static void copyPhotoToInputFolder(Context context, Uri sourceUri){
-        String destPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                + "/Clusterface/Input/" + sourceUri.getLastPathSegment() + ".jpg";
+        String destPath = Utils.getInputPath() + "/" + sourceUri.getLastPathSegment() + ".jpg";
 
         try {
             InputStream inputStream = context.getContentResolver().openInputStream(sourceUri);
@@ -83,8 +80,7 @@ public class Utils
 
     public static void createResultsFolder(ClusteringHandler clHandler,
                                            HashMap<String, Encoding> Encodings){
-        String resultsDirPath = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES) + "/Clusterface/Results";
+        String resultsDirPath = getResultsPath();
         File resultsDir = new File(resultsDirPath);
 
         /**create results folder*/
@@ -119,7 +115,7 @@ public class Utils
 
         /**get the crops directory path
          * images will be loaded from here and saved to the results folder*/
-        String cropsDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Clusterface/Crops";
+        String cropsDirPath = getCropsPath();
 
         Iterator it = Encodings.entrySet().iterator();
         MainActivity.saveResultsProgressBar.setMax(Encodings.size());
@@ -132,9 +128,9 @@ public class Utils
 
             /**get the cluster id for this encoding*/
             int clusterIdx;
-            if(MainActivity.clusterMethod == MainActivity.dbscan)
+            if(MainActivity.clusterMethod.equals(MainActivity.dbscan))
                 clusterIdx = clHandler.getDBScanClusterIdx(encoding);
-            else if(MainActivity.clusterMethod == MainActivity.kmeans)
+            else if(MainActivity.clusterMethod.equals(MainActivity.kmeans))
                 clusterIdx = clHandler.getKMeansClusterIdx(encoding);
             else
                 return;
@@ -157,8 +153,7 @@ public class Utils
     //TODO : use asynctask for saving files
 
     public static void saveEncodings(Context context, HashMap<String, Encoding> Encodings){
-        String encPath = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES) + "/Clusterface/encodings.enc";
+        String encPath = getEncodingsPath();
         File file = new File(encPath);
         ObjectOutputStream outputStream = null;
         try {
@@ -174,8 +169,7 @@ public class Utils
     }
 
     public static HashMap<String, Encoding> loadEncodings(){
-        String encPath = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES) + "/Clusterface/encodings.enc";
+        String encPath = getEncodingsPath();
         File file = new File(encPath);
 
         if(!file.exists())
@@ -192,5 +186,34 @@ public class Utils
             e.printStackTrace();
         }
         return encodings;
+    }
+
+    public static String getBasePath()
+    {
+        /**keep the base folder hidden so the user's gallery is not flooded with crops*/
+
+        //return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        //        + "./Clusterface";
+       return Environment.getExternalStorageDirectory() + "/.Clusterface";
+    }
+
+    public static String getInputPath()
+    {
+        return getBasePath() + "/Input";
+    }
+
+    public static String getCropsPath()
+    {
+        return getBasePath() + "/Crops";
+    }
+
+    public static String getResultsPath()
+    {
+        return getBasePath() + "/Results";
+    }
+
+    public static String getEncodingsPath()
+    {
+        return getBasePath() + "/encodings.enc";
     }
 }
