@@ -107,9 +107,9 @@ public class MainActivity extends AppCompatActivity {
 
         clusterTypeSpinner = findViewById(R.id.cluster_type_spinner);
         List<String> categories = new ArrayList<>();
-        categories.add(dbscan);
-        categories.add(kmeans);
         categories.add(cw);
+        categories.add(kmeans);
+        categories.add(dbscan);
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, categories);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         clusterTypeSpinner.setAdapter(spinnerAdapter);

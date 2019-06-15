@@ -164,7 +164,7 @@
             android:id="@+id/cw_threshold"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="80"
+            android:text="75"
             android:inputType="number"/>
 
         <TextView
