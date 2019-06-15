@@ -21,6 +21,7 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.List;
 
@@ -153,7 +154,12 @@ public class FaceHandler {
             return;
         }
 
-        files = inputDir.listFiles();
+        files = inputDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return !name.equals(".nomedia");
+            }
+        });
         if(files == null){
             Utils.showToast(mContext, "ERROR : No files found in the input folder!");
             return;
@@ -164,7 +170,12 @@ public class FaceHandler {
         File cropsDir = new File(Utils.getCropsPath());
         if(cropsDir.exists())
         {
-            for(File crop : cropsDir.listFiles())
+            for(File crop : cropsDir.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return !name.equals(".nomedia");
+                }
+            }))
             {
                 String cropName = FilenameUtils.removeExtension(crop.getName());
                 String possibleInputName  = cropName.substring(0, cropName.lastIndexOf('_')) + "." + FilenameUtils.getExtension(crop.getName());

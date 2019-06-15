@@ -239,6 +239,26 @@ public class ChineseWhispersHandler {
             return;
         }
 
+        /*add the .nomedia file to each cluster folder*/
+        for(int i = 0; i < graph.clusters.length; i++)
+        {
+            File clusterFolder = new File(resultsDirPath + "/" + graph.clusters[i]);
+            clusterFolder.mkdirs();
+            File noMedia = new File(resultsDirPath+"/"+graph.clusters[i]+"/.nomedia");
+            if(!noMedia.exists()) {
+                try {
+                    noMedia.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        /*dummy progress bar
+        * TODO add async saving*/
+        MainActivity.saveResultsProgressBar.setMax(1);
+        MainActivity.saveResultsProgressBar.setProgress(0);
+
         for(int i = 0; i < graph.clusters.length; i++){
             String sourcePath = cropsDirPath + "/" + fileNames[i];
             String destPath = resultsDirPath + "/" + graph.clusters[i] + "/" +  fileNames[i];
@@ -252,5 +272,6 @@ public class ChineseWhispersHandler {
                 Log.d("ChineseWhispersHandler", "Unable to copy image to results folder!");
             }
         }
+        MainActivity.saveResultsProgressBar.setProgress(1);
     }
 }

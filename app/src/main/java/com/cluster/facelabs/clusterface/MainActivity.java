@@ -166,6 +166,8 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, permissionsToRequest.toArray(new String[0]),
                     RC_STORAGE_PERMISSION);
         }
+        else
+            Utils.createInputAndCropsFolder();
     }
 
     @Override
@@ -176,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Utils.showToast(this ,"Storage permission granted!");
+                    Utils.createInputAndCropsFolder();
                 } else {
                     Utils.showToast(this ,"Storage permission denied!");
                 }

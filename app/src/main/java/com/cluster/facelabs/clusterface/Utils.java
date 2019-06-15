@@ -110,7 +110,18 @@ public class Utils
             File clusterDir = new File(clusterDirPath);
             success = true;
             if (!clusterDir.exists()) success = clusterDir.mkdirs();
-            if(!success){Log.d("save_debug", "Could not create clusters folder!");return;}
+            if(!success){
+                Log.d("save_debug", "Could not create clusters folder!");
+                return;
+            }
+
+            /*add the .nomedia file to each cluster folder*/
+            File noMedia = new File(clusterDirPath + "/.nomedia");
+            try {
+                noMedia.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         /**get the crops directory path
@@ -190,11 +201,9 @@ public class Utils
 
     public static String getBasePath()
     {
-        /**keep the base folder hidden so the user's gallery is not flooded with crops*/
-
         //return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        //        + "./Clusterface";
-       return Environment.getExternalStorageDirectory() + "/.Clusterface";
+        //        + "/Clusterface";
+        return Environment.getExternalStorageDirectory() + "/Clusterface";
     }
 
     public static String getInputPath()
@@ -215,5 +224,34 @@ public class Utils
     public static String getEncodingsPath()
     {
         return getBasePath() + "/encodings.enc";
+    }
+
+    public static void createInputAndCropsFolder()
+    {
+        File inputDir = new File(getInputPath());
+        if(!inputDir.exists())
+            inputDir.mkdirs();
+
+        /**create empty ".nomedia" files in the directories
+         * to prevent gallery from including these images*/
+        File inputNoMedia = new File((getInputPath() + "/.nomedia"));
+        if(!inputNoMedia.exists()) {
+            try {
+                inputNoMedia.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        File cropsDir = new File(getCropsPath());
+        if(!cropsDir.exists())
+            cropsDir.mkdirs();
+        File cropsNoMedia = new File(getCropsPath() + "/.nomedia");
+        if(!cropsNoMedia.exists()) {
+            try {
+                cropsNoMedia.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

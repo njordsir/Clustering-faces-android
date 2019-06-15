@@ -14,6 +14,7 @@ import org.tensorflow.lite.Interpreter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -220,11 +221,17 @@ public class TfliteHandler
         String cropsDirPath = Utils.getCropsPath();
         File cropsDir = new File(cropsDirPath);
 
-        File[] files = cropsDir.listFiles();
+        File[] files = cropsDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return !name.equals(".nomedia");
+            }
+        });
         if(files == null){
             Utils.showToast(mContext, "No crops found!");
             return;
         }
+
 
         MainActivity.encodingProgressBar.setMax(files.length + 1);
 
