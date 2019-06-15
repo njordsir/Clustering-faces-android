@@ -2,12 +2,15 @@ package com.cluster.facelabs.clusterface;
 
 import android.Manifest;
 import android.content.ClipData;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -172,17 +175,47 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case RC_STORAGE_PERMISSION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Utils.showToast(this ,"Storage permission granted!");
-                    Utils.createInputAndCropsFolder();
-                } else {
-                    Utils.showToast(this ,"Storage permission denied!");
+                                           String[] permissions, int[] grantResults) {
+        if (requestCode == RC_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                /*permission granted*/
+                Utils.createInputAndCropsFolder();
+            } else {
+                /*permission denied*/
+
+                /*if the user has not clicked "Do not ask again"
+                 * and cancels the permission grant, exit app*/
+                if (ActivityCompat.shouldShowRequestPermissionRationale(
+                        this, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                    this.finishAndRemoveTask();
+                    /*if the user has clicked on "Do not ask again"
+                     * display a dialog saying that permission is required
+                     * and re-direct the user to the settings to grant permission
+                     *
+                     * if the user cancels this dialog as well, exit app*/
+                else {
+                    final AlertDialog.Builder adb = new AlertDialog.Builder(this);
+                    adb.setTitle("Permissions Required")
+                            .setMessage("You have denied Storage permissions which are required to proceed!\n" +
+                                    "Please grant permission from the app settings.")
+                            .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    Uri uri = Uri.fromParts("package", MainActivity.this.getPackageName(), null);
+                                    intent.setData(uri);
+                                    /*after getting back from this activity
+                                     * check again if permission has been granted*/
+                                    startActivityForResult(intent, RC_STORAGE_PERMISSION);
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    MainActivity.this.finishAndRemoveTask();
+                                }
+                            }).setCancelable(false).create().show();
                 }
-                return;
             }
         }
     }
@@ -217,6 +250,10 @@ public class MainActivity extends AppCompatActivity {
             }else{
                 Utils.showToast(this, "Unable to pick image from gallery!");
             }
+        }
+        else if(requestCode == RC_STORAGE_PERMISSION)
+        {
+            requestPermissions();
         }
     }
 
