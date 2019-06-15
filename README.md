@@ -16,6 +16,12 @@ and clusters faces belonging to recognized individuals.
 * Select between Chinese Whispers, KMeans and DBScan clustering.
 
 ## Screenshots
+<p align="left">
+  <img src="https://github.com/njordsir/Clustering-faces-android/blob/master/app_screen_1.jpg" width="210">
+  <img src="https://github.com/njordsir/Clustering-faces-android/blob/master/app_screen_2.jpg" width="210">
+  <img src="https://github.com/njordsir/Clustering-faces-android/blob/master/file_manager_screen_1.jpg" width="210">
+  <img src="https://github.com/njordsir/Clustering-faces-android/blob/master/file_manager_screen_2.jpg" width="210">
+</p>
 
 ## Notes
 * All the observations made in [Part I](https://github.com/njordsir/Clustering-Faces) hold here as well
@@ -25,3 +31,9 @@ and clusters faces belonging to recognized individuals.
 1. Results have to be inspected via the file manager. Will add a gallery view to showcase results.
 2. Will add background processes for most computation and app view will only consist of a Google Photos like interface.
 3. Several major features remain to be added.
+
+## Downloads
+* Install and test on device with [apk](https://drive.google.com/open?id=1RG6DL4TKq4b3ZG4WyFZUb4dBxpAkM8vE)
+* tflite models for facenet 
+[128-dimensional](https://drive.google.com/open?id=1P27hVEUWH7DSDVhjshkGnhI44PoLCYG0) 
+[512-dimensional](https://drive.google.com/open?id=13Wu0F_CTMwFO5oPCItta2mvLzo34GV05)
