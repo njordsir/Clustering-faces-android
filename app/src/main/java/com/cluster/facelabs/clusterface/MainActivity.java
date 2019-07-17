@@ -18,7 +18,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -49,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView kDesc, epsDesc, minPtsDesc, cwThreshDesc, cwGraphProgressDesc;
 
     public static TextView clusterResultsText;
+
+    public static SeekBar minFaceSizeSeekbar;
+    public static Switch faceDetectModeSwitch;
 
     TfliteHandler tfliteHandler = null;
     FaceHandler faceHandler = null;
@@ -88,6 +93,9 @@ public class MainActivity extends AppCompatActivity {
         cwThreshText = findViewById(R.id.cw_threshold);
 
         clusterResultsText = findViewById(R.id.cluster_output_text);
+
+        minFaceSizeSeekbar = findViewById(R.id.min_face_size_seekbar);
+        faceDetectModeSwitch = findViewById(R.id.face_detect_mode_switch);
 
         final ArrayList<View> dbscanViews = new ArrayList<>();
         dbscanViews.add(epsDesc);

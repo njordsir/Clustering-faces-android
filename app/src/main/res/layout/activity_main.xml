@@ -51,6 +51,39 @@
                 android:textSize="12sp"
                 android:onClick="selectInputPhotos"
                 style="@style/Widget.AppCompat.Button.Colored"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Min face size"
+                android:textSize="18sp"/>
+            <SeekBar
+                android:id="@+id/min_face_size_seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:theme="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:max="5"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Accurate"
+                    android:textSize="18sp"/>
+                <Switch
+                    android:id="@+id/face_detect_mode_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Fast"
+                    android:textSize="18sp"/>
+            </LinearLayout>
             <Button
                 android:id="@+id/get_faces_button"
                 android:layout_width="100dp"

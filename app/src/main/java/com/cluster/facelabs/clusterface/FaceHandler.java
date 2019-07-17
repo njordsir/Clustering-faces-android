@@ -25,20 +25,41 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.List;
 
+import static com.cluster.facelabs.clusterface.MainActivity.faceDetectModeSwitch;
+import static com.cluster.facelabs.clusterface.MainActivity.minFaceSizeSeekbar;
+
 public class FaceHandler {
 
     int mIdx = -1;
     File[] files;
     /*[TODO]
-    * Queue up-to 5 instead of just 1
-    * */
+     * Queue up-to 5 instead of just 1
+     * */
     int mQueueCounter = 0;
     int mQueueMax = 5;
 
     private Context mContext;
+    FirebaseVisionFaceDetector mFaceDetector;
 
     public FaceHandler(Context context){
         mContext = context;
+
+        /**face detector options*/
+        float minFaceSize = 0.05f*(1+minFaceSizeSeekbar.getProgress());
+        int performanceMode;
+        if(faceDetectModeSwitch.isEnabled())
+            performanceMode = FirebaseVisionFaceDetectorOptions.FAST;
+        else
+            performanceMode = FirebaseVisionFaceDetectorOptions.ACCURATE;
+
+        FirebaseVisionFaceDetectorOptions options =
+                new FirebaseVisionFaceDetectorOptions.Builder()
+                        .setPerformanceMode(performanceMode)
+                        .setMinFaceSize(minFaceSize)
+                        .build();
+
+        /**get face detector*/
+        mFaceDetector = FirebaseVision.getInstance().getVisionFaceDetector(options);
     }
 
     /**get an instance of FirebaseVisionImage from imagepath or bitmap*/
@@ -62,19 +83,8 @@ public class FaceHandler {
                                     final Bitmap bitmap,
                                     final String imageName){
         FirebaseVisionImage image = getFirebaseVisionImage(imagePath, bitmap);
-
-        /**face detector options*/
-        FirebaseVisionFaceDetectorOptions options =
-                new FirebaseVisionFaceDetectorOptions.Builder()
-                        .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
-                        .setMinFaceSize(0.05f)
-                        .build();
-
-        /**get face detector*/
-        FirebaseVisionFaceDetector faceDetector = FirebaseVision.getInstance().getVisionFaceDetector(options);
-
         /**start detection with callbacks*/
-        faceDetector.detectInImage(image)
+        mFaceDetector.detectInImage(image)
                 .addOnSuccessListener(
                         new OnSuccessListener<List<FirebaseVisionFace>>() {
                             @Override
@@ -103,7 +113,6 @@ public class FaceHandler {
                                               Uri imagePath, Bitmap bitmap, String imageName){
         if(faces.size() == 0){
             Log.d("finding faces", "No faces found!");
-            Utils.showToast(mContext, "No faces found!");
             return;
         }
 
@@ -129,8 +138,6 @@ public class FaceHandler {
             int left = face.getBoundingBox().left;
             int width = face.getBoundingBox().width();
             int height = face.getBoundingBox().height();
-            //showToast("("+String.valueOf(left) + "," + String.valueOf(top) + "),(" + String.valueOf(width) + "," + String.valueOf(height) + ")");
-
 
             /**create a bitmap for identified face*/
             try {
