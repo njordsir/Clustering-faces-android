@@ -23,6 +23,9 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.cluster.facelabs.clusterface.Gallery.GalleryActivity;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -321,5 +324,18 @@ public class MainActivity extends AppCompatActivity {
             }
             Utils.createResultsFolder(clusteringHandler, Encodings);
         }
+    }
+
+    public void showResults(View view)
+    {
+        File resultsFolder = new File(Utils.getResultsPath());
+        if(!resultsFolder.exists())
+        {
+            Utils.showToast(this, "No results to show!");
+            return;
+        }
+        Intent intent = new Intent(this, GalleryActivity.class);
+        intent.putExtra("mode", 1);
+        startActivity(intent);
     }
 }

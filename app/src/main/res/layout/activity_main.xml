@@ -312,6 +312,16 @@
                 android:padding="5dp"
                 android:progress="0"
                 android:progressDrawable="@drawable/blue_progress"/>
+            <Button
+                android:id="@+id/show_results_button"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:text="Show\nResults"
+                android:textSize="12sp"
+                android:onClick="showResults"
+                style="@style/Widget.AppCompat.Button.Colored"/>
         </LinearLayout>
         <!-->##############SAVE RESULTS#################<-->
 
