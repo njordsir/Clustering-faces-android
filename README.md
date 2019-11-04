@@ -14,13 +14,12 @@ and clusters faces belonging to recognized individuals.
 * Select photos to process in-app or directly add photos to external storage -> Clusterface -> Input
 * Face crops and clustering results are saved to their respective folders.
 * Select between Chinese Whispers, KMeans and DBScan clustering.
+* Interactive gallery view for results
 
 ## Screenshots
-<p align="left">
-  <img src="https://github.com/njordsir/Clustering-faces-android/blob/master/app_screen_1.jpg" width="210">
-  <img src="https://github.com/njordsir/Clustering-faces-android/blob/master/app_screen_2.jpg" width="210">
-  <img src="https://github.com/njordsir/Clustering-faces-android/blob/master/file_manager_screen_1.jpg" width="210">
-  <img src="https://github.com/njordsir/Clustering-faces-android/blob/master/file_manager_screen_2.jpg" width="210">
+<p align="center">
+  <img src="screen1.jpg" width="210" hspace="20">
+  <img src="screen2.jpg" width="210" hspace="20">
 </p>
 
 ## Notes
@@ -28,12 +27,9 @@ and clusters faces belonging to recognized individuals.
 * Try to test significantly-sized collections of personal photos with ChineseWhispers clustering for best results.
 
 ## TODO
-1. Results have to be inspected via the file manager. Will add a gallery view to showcase results.
+1. Results have to be inspected via the file manager. Will add a gallery view to showcase results. [Done]
 2. Will add background processes for most computation and app view will only consist of a Google Photos like interface.
 3. Several major features remain to be added.
 
 ## Downloads
-* Install and test on device with [apk](https://drive.google.com/open?id=1RG6DL4TKq4b3ZG4WyFZUb4dBxpAkM8vE)
-* tflite models for facenet 
-[128-dimensional](https://drive.google.com/open?id=1P27hVEUWH7DSDVhjshkGnhI44PoLCYG0) 
-[512-dimensional](https://drive.google.com/open?id=13Wu0F_CTMwFO5oPCItta2mvLzo34GV05)
+* Install and test on device with [apk](https://drive.google.com/open?id=1TV8l__T8WhGV4346MRfYazi0D_mB9se-)
