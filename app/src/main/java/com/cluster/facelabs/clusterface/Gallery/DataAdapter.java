@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -53,6 +54,8 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             viewHolder.img.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    v.startAnimation(AnimationUtils.loadAnimation(v.getContext(), R.anim.image_click));
+
                     Intent intent = new Intent(v.getContext(), GalleryActivity.class);
                     intent.putExtra("mode", 2);
                     intent.putExtra("personIdx", personIdx);
@@ -64,6 +67,8 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             viewHolder.img.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    v.startAnimation(AnimationUtils.loadAnimation(v.getContext(), R.anim.image_click));
+
                     Intent intent = new Intent(v.getContext(), ImageActivity.class);
                     intent.putExtra("cropPath", imageUrls.get(i));
                     v.getContext().startActivity(intent);
